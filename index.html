@@ -25,12 +25,20 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 1.25
 .icon-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s}
 .icon-btn:hover{background:var(--border2)}
 main{max-width:900px;margin:0 auto;padding:1.25rem}
+
+/* TAB BAR */
+.tab-bar{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:2px solid var(--border)}
+.tab-btn{background:transparent;border:none;color:var(--muted2);padding:10px 18px;font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;position:relative;transition:all .2s;letter-spacing:.02em}
+.tab-btn::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:transparent;transition:all .2s}
+.tab-btn.active{color:var(--gold2)}
+.tab-btn.active::after{background:var(--gold)}
+.tab-btn:hover{color:var(--text)}
+.tab-btn .tab-icon{margin-right:5px}
+
 .period-bar{display:flex;gap:6px;margin-bottom:1.25rem;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .period-bar::-webkit-scrollbar{display:none}
 .period-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:6px 14px;border-radius:40px;font-size:.78rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
 .period-btn.active{background:var(--gold);border-color:var(--gold);color:#0a0600}
-.invest-btn{border-color:rgba(232,160,32,.3) !important;color:var(--gold) !important}
-.invest-btn.active{background:rgba(232,160,32,.15) !important;border-color:var(--gold) !important;color:var(--gold2) !important}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
 @media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;position:relative;overflow:hidden}
@@ -50,6 +58,22 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
 .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .cat-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cat-amt{font-family:'DM Mono',monospace;color:var(--muted2);font-size:.72rem}
+
+/* ANALYSIS VIEW */
+.analysis-view{display:none;margin-bottom:1rem}
+.analysis-view.show{display:block}
+.analysis-controls{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.analysis-controls .group-label{font-size:.72rem;color:var(--muted);font-weight:600;margin-right:2px}
+.analysis-pill{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:5px 12px;border-radius:40px;font-size:.72rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
+.analysis-pill.active{background:var(--gold);border-color:var(--gold);color:#0a0600}
+.analysis-chart-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;margin-bottom:10px}
+.analysis-chart-wrap{position:relative;height:260px}
+@media(max-width:600px){.analysis-chart-wrap{height:220px}}
+.analysis-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:1rem}
+.analysis-stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:.75rem .9rem}
+.analysis-stat-label{font-size:.65rem;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.25rem}
+.analysis-stat-val{font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--text)}
+
 /* INVEST VIEW */
 .invest-view{display:none;margin-bottom:1rem}
 .invest-view.show{display:block}
@@ -133,10 +157,17 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
   </div>
 </header>
 <main>
+  <!-- TAB BAR -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" onclick="setTab('overview')"><span class="tab-icon">📊</span>Özet</button>
+    <button class="tab-btn" onclick="setTab('analysis')"><span class="tab-icon">📈</span>Analiz</button>
+    <button class="tab-btn" onclick="setTab('invest')"><span class="tab-icon">🥇</span>Altın & Döviz</button>
+  </div>
+
   <div class="period-bar" id="periodBar"></div>
   <div class="cards" id="summaryCards"></div>
 
-  <!-- NORMAL VIEW -->
+  <!-- OVERVIEW (NORMAL) VIEW -->
   <div id="normalView">
     <div class="charts">
       <div class="chart-box">
@@ -158,6 +189,20 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
     </div>
     <div class="filter-row" id="filterRow"></div>
     <div class="tx-list" id="txList"></div>
+  </div>
+
+  <!-- ANALYSIS VIEW -->
+  <div class="analysis-view" id="analysisView">
+    <div class="analysis-controls" id="analysisControls"></div>
+    <div class="analysis-summary" id="analysisSummary"></div>
+    <div class="analysis-chart-box">
+      <div class="chart-title" id="analysisChartTitle">Kategori Bazlı Harcama</div>
+      <div class="analysis-chart-wrap"><canvas id="analysisChart"></canvas></div>
+    </div>
+    <div class="analysis-chart-box">
+      <div class="chart-title" id="analysisCompareTitle">Karşılaştırma</div>
+      <div class="analysis-chart-wrap"><canvas id="analysisCompareChart"></canvas></div>
+    </div>
   </div>
 
   <!-- INVESTMENT VIEW -->
@@ -225,9 +270,15 @@ const CATS={
 const EXCL=['Gelen Transfer','Giden Transfer','Altın & Döviz'];
 const COLORS=['#e8a020','#00c896','#f04060','#4080ff','#9060f0','#00d4ff','#ff6040','#60d060','#c0a000','#ff60a0','#80c0ff','#40e0a0'];
 
+// Analysis category groups
+const ANALYSIS_CATS=['Market','Yemek Sipariş','Kafe & Restoran','Eğlence','Abonelik','Ulaşım','Fatura','Scooter','Akaryakıt','ATM','Diğer'];
+const ANALYSIS_COLORS={'Market':'#4ade80','Yemek Sipariş':'#fb923c','Kafe & Restoran':'#c084fc','Eğlence':'#a78bfa','Abonelik':'#60a0ff','Ulaşım':'#22d3ee','Fatura':'#94a3b8','Scooter':'#f472b6','Akaryakıt':'#f87171','ATM':'#94a3b8','Diğer':'#5a6680'};
+
 let allTx=JSON.parse(localStorage.getItem('paratakip_tx')||'[]');
-let period='all',filter='all',view='normal',visible=40;
-let catChart,dayChart;
+let period='all',filter='all',currentTab='overview',visible=40;
+let catChart,dayChart,analysisChart,analysisCompareChart;
+let analysisMode='day'; // day, week, month
+let analysisCat='all'; // all or specific category
 
 function cat(desc){
   const d=desc.toUpperCase();
@@ -245,26 +296,54 @@ function byPeriod(){
   return allTx.filter(t=>{const[d,m,y]=t.date.split('.');return`${y}-${m}`===period;});
 }
 
+// ---- TAB BAR ----
+function setTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',
+      (tab==='overview'&&i===0)||(tab==='analysis'&&i===1)||(tab==='invest'&&i===2));
+  });
+  renderPeriodBar();
+  renderCards();
+  document.getElementById('normalView').style.display=tab==='overview'?'block':'none';
+  document.getElementById('analysisView').classList.toggle('show',tab==='analysis');
+  document.getElementById('investView').classList.toggle('show',tab==='invest');
+  if(tab==='overview')showNormal();
+  else if(tab==='analysis')renderAnalysis();
+  else if(tab==='invest')renderInvest();
+}
+
 // ---- PERIOD BAR ----
 function renderPeriodBar(){
   const map={};
   for(const t of allTx){const[d,m,y]=t.date.split('.');const k=`${y}-${m}`;if(!map[k])map[k]=new Date(+y,+m-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});}
   const periods=Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0]));
-  let h=`<button class="period-btn ${period==='all'&&view==='normal'?'active':''}" onclick="setPeriod('all')">Tümü</button>`;
-  for(const[k,l]of periods)h+=`<button class="period-btn ${period===k&&view==='normal'?'active':''}" onclick="setPeriod('${k}')">${l}</button>`;
-  h+=`<button class="period-btn invest-btn ${view==='invest'?'active':''}" onclick="setView('invest')">🥇 Yatırım</button>`;
+  let h=`<button class="period-btn ${period==='all'?'active':''}" onclick="setPeriod('all')">Tümü</button>`;
+  for(const[k,l]of periods)h+=`<button class="period-btn ${period===k?'active':''}" onclick="setPeriod('${k}')">${l}</button>`;
   document.getElementById('periodBar').innerHTML=h;
 }
 
-function setPeriod(p){period=p;filter='all';visible=40;view='normal';renderPeriodBar();renderCards();showNormal();}
-function setView(v){view=v;visible=40;renderPeriodBar();renderCards();if(v==='invest'){document.getElementById('normalView').style.display='none';document.getElementById('investView').classList.add('show');renderInvest();}else showNormal();}
+function setPeriod(p){period=p;filter='all';visible=40;renderPeriodBar();renderCards();
+  if(currentTab==='overview')showNormal();
+  else if(currentTab==='analysis')renderAnalysis();
+  else if(currentTab==='invest')renderInvest();
+}
 
 // ---- CARDS ----
 function renderCards(){
   const tx=byPeriod();
-  const last=tx.length?tx[tx.length-1].balance:0;
+  // FIX: Find the actual last balance by using the highest _order index (original PDF order)
+  let last=0;
+  if(tx.length){
+    let lastTx=tx[tx.length-1];
+    // Among all tx, find the one with the highest _order (last in bank statement)
+    for(const t of tx){
+      if((t._order||0)>(lastTx._order||0)) lastTx=t;
+    }
+    last=lastTx.balance;
+  }
 
-  if(view==='invest'){
+  if(currentTab==='invest'){
     const g=tx.filter(t=>t.category==='Altın & Döviz');
     const alim=g.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
     const sat=g.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
@@ -284,21 +363,18 @@ function renderCards(){
   const net=incT-spT;
   document.getElementById('summaryCards').innerHTML=`
     <div class="card c-gold"><div class="card-label">Güncel Bakiye</div><div class="card-value neutral">${fmt(last)}</div><div class="card-sub">Dönem sonu · ${tx.length} işlem</div></div>
-    <div class="card c-red"><div class="card-label">Harcama</div><div class="card-value negative">${fmt(spT)}</div><div class="card-sub">${sp.length} işlem · transfer/yatırım hariç</div></div>
-    <div class="card c-green"><div class="card-label">Gelir</div><div class="card-value positive">${fmt(incT)}</div><div class="card-sub">${inc.length} işlem · transfer/yatırım hariç</div></div>
+    <div class="card c-red"><div class="card-label">Harcama</div><div class="card-value negative">${fmt(spT)}</div><div class="card-sub">${sp.length} işlem (transfer/altın hariç)</div></div>
+    <div class="card c-green"><div class="card-label">Gelir</div><div class="card-value positive">${fmt(incT)}</div><div class="card-sub">${inc.length} işlem (transfer/altın hariç)</div></div>
     <div class="card ${net>=0?'c-blue':'c-red'}"><div class="card-label">Net</div><div class="card-value ${net>=0?'positive':'negative'}">${net>=0?'+':''}${fmt(net)}</div><div class="card-sub">Gerçek gelir − harcama</div></div>`;
 }
 
 // ---- NORMAL VIEW ----
 function showNormal(){
-  document.getElementById('normalView').style.display='block';
-  document.getElementById('investView').classList.remove('show');
   renderCharts();renderTx();
 }
 
 function renderCharts(){
   const tx=byPeriod();
-  // Cat chart — exclude transfers & gold
   const expenses=tx.filter(t=>t.amount<0&&!EXCL.includes(t.category));
   const cmap={};for(const t of expenses)cmap[t.category]=(cmap[t.category]||0)+Math.abs(t.amount);
   const sorted=Object.entries(cmap).sort((a,b)=>b[1]-a[1]).slice(0,9);
@@ -306,13 +382,136 @@ function renderCharts(){
   document.getElementById('catLegend').innerHTML=sorted.map((e,i)=>`<div class="cat-legend-row"><div class="cat-dot" style="background:${cols[i]}"></div><div class="cat-name">${e[0]}</div><div class="cat-amt">${fmt(e[1])}</div></div>`).join('');
   if(catChart)catChart.destroy();
   if(sorted.length)catChart=new Chart(document.getElementById('catChart'),{type:'doughnut',data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmt(ctx.raw)}}}}});
-  // Day chart — exclude transfers & gold
+  // Day chart
   const dmap={};
   for(const t of tx){if(t.amount<0&&!EXCL.includes(t.category)){const k=t.date.substring(0,5);dmap[k]=(dmap[k]||0)+Math.abs(t.amount);}}
   const ds=Object.entries(dmap).sort((a,b)=>a[0].localeCompare(b[0]));
   if(dayChart)dayChart.destroy();
   if(ds.length)dayChart=new Chart(document.getElementById('dayChart'),{type:'bar',data:{labels:ds.map(e=>e[0]),datasets:[{data:ds.map(e=>e[1]),backgroundColor:'rgba(232,160,32,.6)',borderColor:'rgba(232,160,32,.9)',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
 }
+
+// ---- ANALYSIS VIEW ----
+function renderAnalysis(){
+  // Controls
+  const cats=ANALYSIS_CATS.filter(c=>{
+    return byPeriod().some(t=>t.category===c&&t.amount<0);
+  });
+  let h=`<span class="group-label">Dönem:</span>`;
+  h+=`<button class="analysis-pill ${analysisMode==='day'?'active':''}" onclick="setAnalysisMode('day')">Günlük</button>`;
+  h+=`<button class="analysis-pill ${analysisMode==='week'?'active':''}" onclick="setAnalysisMode('week')">Haftalık</button>`;
+  h+=`<button class="analysis-pill ${analysisMode==='month'?'active':''}" onclick="setAnalysisMode('month')">Aylık</button>`;
+  h+=`<span class="group-label" style="margin-left:8px">Kategori:</span>`;
+  h+=`<button class="analysis-pill ${analysisCat==='all'?'active':''}" onclick="setAnalysisCat('all')">Tümü</button>`;
+  for(const c of cats){
+    const ico=CATS[c]?.icon||'•';
+    h+=`<button class="analysis-pill ${analysisCat===c?'active':''}" onclick="setAnalysisCat('${c}')">${ico} ${c}</button>`;
+  }
+  document.getElementById('analysisControls').innerHTML=h;
+
+  const tx=byPeriod().filter(t=>t.amount<0&&!EXCL.includes(t.category));
+  const filtered=analysisCat==='all'?tx:tx.filter(t=>t.category===analysisCat);
+
+  // Summary stats
+  const total=filtered.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const count=filtered.length;
+  const avg=count?total/count:0;
+  const days=new Set(filtered.map(t=>t.date)).size;
+  const dailyAvg=days?total/days:0;
+  document.getElementById('analysisSummary').innerHTML=`
+    <div class="analysis-stat"><div class="analysis-stat-label">Toplam</div><div class="analysis-stat-val" style="color:var(--red)">${fmt(total)}</div></div>
+    <div class="analysis-stat"><div class="analysis-stat-label">İşlem Sayısı</div><div class="analysis-stat-val">${count}</div></div>
+    <div class="analysis-stat"><div class="analysis-stat-label">Ortalama İşlem</div><div class="analysis-stat-val">${fmt(avg)}</div></div>
+    <div class="analysis-stat"><div class="analysis-stat-label">Günlük Ortalama</div><div class="analysis-stat-val">${fmt(dailyAvg)}</div></div>`;
+
+  // Main chart
+  renderAnalysisMainChart(filtered);
+  // Compare chart
+  renderAnalysisCompareChart(tx);
+}
+
+function renderAnalysisMainChart(filtered){
+  if(analysisChart)analysisChart.destroy();
+  const el=document.getElementById('analysisChart');
+
+  if(analysisMode==='day'){
+    document.getElementById('analysisChartTitle').textContent='Günlük Harcama' + (analysisCat!=='all'?' — '+analysisCat:'');
+    const dmap={};
+    for(const t of filtered){const k=t.date.substring(0,5);dmap[k]=(dmap[k]||0)+Math.abs(t.amount);}
+    const ds=Object.entries(dmap).sort((a,b)=>a[0].localeCompare(b[0]));
+    if(!ds.length)return;
+    analysisChart=new Chart(el,{type:'bar',data:{labels:ds.map(e=>e[0]),datasets:[{data:ds.map(e=>e[1]),backgroundColor:'rgba(232,160,32,.65)',borderColor:'rgba(232,160,32,.9)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+  }
+  else if(analysisMode==='week'){
+    document.getElementById('analysisChartTitle').textContent='Haftalık Harcama' + (analysisCat!=='all'?' — '+analysisCat:'');
+    const wmap={};
+    for(const t of filtered){
+      const[d,m,y]=t.date.split('.');
+      const dt=new Date(+y,+m-1,+d);
+      const weekStart=new Date(dt);weekStart.setDate(dt.getDate()-dt.getDay()+1);
+      const wk=weekStart.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+      wmap[wk]=(wmap[wk]||0)+Math.abs(t.amount);
+    }
+    const ds=Object.entries(wmap);
+    if(!ds.length)return;
+    analysisChart=new Chart(el,{type:'bar',data:{labels:ds.map(e=>e[0]),datasets:[{data:ds.map(e=>e[1]),backgroundColor:'rgba(0,200,150,.55)',borderColor:'rgba(0,200,150,.9)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+  }
+  else if(analysisMode==='month'){
+    document.getElementById('analysisChartTitle').textContent='Aylık Harcama' + (analysisCat!=='all'?' — '+analysisCat:'');
+    const mmap={};
+    for(const t of filtered){
+      const[d,m,y]=t.date.split('.');
+      const mk=new Date(+y,+m-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
+      mmap[mk]=(mmap[mk]||0)+Math.abs(t.amount);
+    }
+    const ds=Object.entries(mmap);
+    if(!ds.length)return;
+    analysisChart=new Chart(el,{type:'bar',data:{labels:ds.map(e=>e[0]),datasets:[{data:ds.map(e=>e[1]),backgroundColor:'rgba(64,128,255,.55)',borderColor:'rgba(64,128,255,.9)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+  }
+}
+
+function renderAnalysisCompareChart(allExpenses){
+  if(analysisCompareChart)analysisCompareChart.destroy();
+  const el=document.getElementById('analysisCompareChart');
+
+  if(analysisMode==='day'){
+    // Stacked bar: categories per day
+    document.getElementById('analysisCompareTitle').textContent='Günlük Kategori Dağılımı';
+    const days=new Set();const catData={};
+    for(const t of allExpenses){
+      const k=t.date.substring(0,5);days.add(k);
+      if(!catData[t.category])catData[t.category]={};
+      catData[t.category][k]=(catData[t.category][k]||0)+Math.abs(t.amount);
+    }
+    const sortedDays=[...days].sort();
+    const datasets=Object.entries(catData).map(([cat,data])=>({
+      label:cat,data:sortedDays.map(d=>data[d]||0),
+      backgroundColor:ANALYSIS_COLORS[cat]||'#5a6680',borderRadius:2,borderWidth:0
+    }));
+    if(!sortedDays.length)return;
+    analysisCompareChart=new Chart(el,{type:'bar',data:{labels:sortedDays,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8090b0',font:{size:10,family:'Syne'},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)}`}}},scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:9}}},y:{stacked:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+  }
+  else if(analysisMode==='week'){
+    // Pie: category breakdown for selected period
+    document.getElementById('analysisCompareTitle').textContent='Kategori Payları';
+    const cmap={};
+    for(const t of allExpenses)cmap[t.category]=(cmap[t.category]||0)+Math.abs(t.amount);
+    const sorted=Object.entries(cmap).sort((a,b)=>b[1]-a[1]);
+    if(!sorted.length)return;
+    analysisCompareChart=new Chart(el,{type:'doughnut',data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),backgroundColor:sorted.map(e=>ANALYSIS_COLORS[e[0]]||'#5a6680'),borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8090b0',font:{size:10,family:'Syne'},boxWidth:10,padding:6}},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmt(ctx.raw)}}}}});
+  }
+  else if(analysisMode==='month'){
+    // Horizontal bar: top categories
+    document.getElementById('analysisCompareTitle').textContent='Kategori Sıralaması';
+    const cmap={};
+    for(const t of allExpenses)cmap[t.category]=(cmap[t.category]||0)+Math.abs(t.amount);
+    const sorted=Object.entries(cmap).sort((a,b)=>b[1]-a[1]);
+    if(!sorted.length)return;
+    analysisCompareChart=new Chart(el,{type:'bar',data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),backgroundColor:sorted.map(e=>ANALYSIS_COLORS[e[0]]||'#5a6680'),borderRadius:4,borderWidth:0}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}},y:{grid:{display:false},ticks:{color:'#8090b0',font:{size:11,family:'Syne'}}}}}});
+  }
+}
+
+function setAnalysisMode(m){analysisMode=m;renderAnalysis();}
+function setAnalysisCat(c){analysisCat=c;renderAnalysis();}
 
 // ---- INVEST VIEW ----
 function renderInvest(){
@@ -374,8 +573,9 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 // ---- FULL RENDER ----
 function render(){
   renderPeriodBar();renderCards();
-  if(view==='invest')renderInvest();
-  else showNormal();
+  if(currentTab==='overview')showNormal();
+  else if(currentTab==='analysis')renderAnalysis();
+  else if(currentTab==='invest')renderInvest();
 }
 
 // ---- PDF PARSING ----
@@ -392,7 +592,6 @@ async function extractText(file){
       }
     }
   }
-  // Sort: page → Y descending (top of page first) → X ascending (left to right)
   items.sort((a,b)=>{
     if(a.page!==b.page)return a.page-b.page;
     if(Math.abs(b.y-a.y)>2)return b.y-a.y;
@@ -402,8 +601,6 @@ async function extractText(file){
 }
 
 function parseTx(fullText){
-  // Match date pairs: DD.MM.YYYY <spaces> DD.MM.YYYY <spaces>
-  // Period header "11.04.2026 - 11.05.2026" won't match (has " - " between)
   const dpRx=/(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})\s+/g;
   const pos=[];let m;
   while((m=dpRx.exec(fullText))!==null){
@@ -414,21 +611,20 @@ function parseTx(fullText){
   const txs=[];
   for(let i=0;i<pos.length;i++){
     const chunk=fullText.substring(pos[i].cs,i+1<pos.length?pos[i+1].index:fullText.length);
-    // Key fix: (?![\d.]) prevents "11.05" in "11.05.2026" from matching as amount
     const nums=[...chunk.matchAll(/-?[\d,]+\.\d{2}(?![\d.])/g)];
     if(nums.length<2)continue;
     const amount=parseFloat(nums[nums.length-2][0].replace(/,/g,''));
     const balance=parseFloat(nums[nums.length-1][0].replace(/,/g,''));
     const desc=chunk.substring(0,nums[nums.length-2].index).replace(/\s+/g,' ').trim();
     if(!desc||desc.length<3)continue;
-    // Skip page header content
     if(['fibabanka','444 88 88','hesap ekstresi','müşteri numarası'].some(w=>desc.toLowerCase().includes(w)))continue;
-    // Sanity check
     if(Math.abs(amount)>999999)continue;
     txs.push({
       id:`${pos[i].date}_${amount}_${Math.random().toString(36).substr(2,4)}`,
       date:pos[i].date,valor:pos[i].valor,description:desc,amount,balance,
-      category:cat(desc),type:amount>=0?'gelir':'gider'
+      category:cat(desc),type:amount>=0?'gelir':'gider',
+      // FIX: Store original parse order so we can find the true last transaction
+      _order:i
     });
   }
   return txs;
@@ -456,7 +652,11 @@ async function processPDF(file){
     }
     const keys=new Set(allTx.map(t=>`${t.date}_${t.amount}_${t.description.substring(0,15)}`));
     const fresh=newTxs.filter(t=>!keys.has(`${t.date}_${t.amount}_${t.description.substring(0,15)}`));
-    allTx=[...allTx,...fresh].sort((a,b)=>a.date.split('.').reverse().join('').localeCompare(b.date.split('.').reverse().join(''))||a.amount-b.amount);
+    // FIX: When merging, update _order for new items to continue from existing max
+    const maxOrder=allTx.reduce((mx,t)=>Math.max(mx,t._order||0),0);
+    fresh.forEach((t,i)=>t._order=maxOrder+1+i);
+    // FIX: Sort by _order (original PDF order) instead of amount
+    allTx=[...allTx,...fresh].sort((a,b)=>(a._order||0)-(b._order||0));
     saveLocal();pf.style.width='90%';pl.textContent='Kaydediliyor...';
     await syncToSheets();
     pf.style.width='100%';pl.textContent=`✅ ${fresh.length} yeni işlem eklendi`;
@@ -476,7 +676,12 @@ async function syncData(){
       if(Array.isArray(remote)&&remote.length){
         const ids=new Set(allTx.map(t=>t.id));
         const fresh=remote.filter(t=>!ids.has(t.id));
-        if(fresh.length){allTx=[...allTx,...fresh].sort((a,b)=>a.date.split('.').reverse().join('').localeCompare(b.date.split('.').reverse().join('')));saveLocal();render();toast(`🔄 ${fresh.length} yeni`);}
+        if(fresh.length){
+          const maxOrder=allTx.reduce((mx,t)=>Math.max(mx,t._order||0),0);
+          fresh.forEach((t,i)=>{if(!t._order)t._order=maxOrder+1+i;});
+          allTx=[...allTx,...fresh].sort((a,b)=>(a._order||0)-(b._order||0));
+          saveLocal();render();toast(`🔄 ${fresh.length} yeni`);
+        }
         else toast('✅ Güncel');
       }
     }else toast('⚠️ URL yok');
@@ -508,6 +713,23 @@ dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f);});
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ---- MIGRATION: Fix existing data without _order ----
+(function migrateOrder(){
+  if(allTx.length && allTx[0]._order===undefined){
+    // Re-sort by date string then assign _order
+    allTx.sort((a,b)=>{
+      const da=a.date.split('.').reverse().join('');
+      const db=b.date.split('.').reverse().join('');
+      if(da!==db)return da.localeCompare(db);
+      // For same date, sort by balance ascending (lower balance = later in day, but not reliable)
+      // Best effort: use balance to infer chronological order within a day
+      return a.balance-b.balance;
+    });
+    allTx.forEach((t,i)=>t._order=i);
+    saveLocal();
+  }
+})();
 
 // ---- INIT ----
 setSync('ok');
