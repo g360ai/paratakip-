@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Para Takip">
+<meta name="theme-color" content="#07090f">
+<title>Para Takip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #07090f;
+  --s1: #0d1120;
+  --s2: #131929;
+  --s3: #1a2238;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e4e8f0;
+  --muted: #5a6680;
+  --muted2: #8090b0;
+  --gold: #e8a020;
+  --gold2: #ffd060;
+  --green: #00c896;
+  --red: #f04060;
+  --blue: #4080ff;
+  --purple: #9060f0;
+  --r: 10px;
+  --r2: 16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+.mono{font-family:'DM Mono',monospace}
+
+/* HEADER */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;color:var(--gold2)}
+.logo span{color:var(--muted2);font-weight:400}
+.header-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;flex-shrink:0}
+.icon-btn:hover{background:var(--border2);border-color:rgba(255,255,255,0.2)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:2px;transition:background .3s}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
+.sync-dot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* MAIN */
+main{max-width:900px;margin:0 auto;padding:1.25rem}
+
+/* PERIOD BAR */
+.period-bar{display:flex;gap:6px;margin-bottom:1.25rem;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.period-bar::-webkit-scrollbar{display:none}
+.period-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:6px 14px;border-radius:40px;font-size:.78rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
+.period-btn.active{background:var(--gold);border-color:var(--gold);color:#0a0600}
+
+/* SUMMARY CARDS */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r2) var(--r2) 0 0}
+.card.c-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.card.c-green::before{background:var(--green)}
+.card.c-red::before{background:var(--red)}
+.card.c-blue::before{background:var(--blue)}
+.card-label{font-size:.72rem;color:var(--muted2);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.4rem}
+.card-value{font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:500;line-height:1}
+.card-value.positive{color:var(--green)}
+.card-value.negative{color:var(--red)}
+.card-value.neutral{color:var(--gold2)}
+.card-sub{font-size:.7rem;color:var(--muted);margin-top:.35rem}
+
+/* CHARTS */
+.charts{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-bottom:1.25rem}
+@media(max-width:600px){.charts{grid-template-columns:1fr}}
+.chart-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem}
+.chart-title{font-size:.78rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.9rem}
+.chart-wrap{position:relative;height:180px}
+
+/* CATEGORY LEGEND */
+.cat-legend{display:flex;flex-direction:column;gap:5px;margin-top:.6rem;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--s3) transparent}
+.cat-legend-row{display:flex;align-items:center;gap:7px;font-size:.75rem}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-amt{font-family:'DM Mono',monospace;color:var(--muted2);font-size:.72rem}
+
+/* TRANSACTIONS */
+.tx-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.85rem;flex-wrap:wrap}
+.tx-title{font-size:.78rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.search-wrap{position:relative;flex:1;min-width:140px;max-width:260px}
+.search-wrap input{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px 7px 30px;border-radius:var(--r);font-size:.82rem;font-family:'Syne',sans-serif;outline:none;transition:border .2s}
+.search-wrap input:focus{border-color:var(--border2)}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
+.filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:5px 10px;border-radius:40px;font-size:.72rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
+.filter-btn.active{background:var(--s3);border-color:var(--border2);color:var(--text)}
+
+/* TX LIST */
+.tx-list{display:flex;flex-direction:column;gap:3px}
+.tx-item{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;cursor:default;transition:background .15s}
+.tx-item:hover{background:var(--s2)}
+.tx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--s3)}
+.tx-info{flex:1;min-width:0}
+.tx-desc{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.tx-meta{display:flex;align-items:center;gap:6px;margin-top:2px}
+.tx-date{font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace}
+.tx-cat-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--muted2);letter-spacing:.04em;text-transform:uppercase}
+.tx-amount{font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;text-align:right;flex-shrink:0}
+.tx-amount.pos{color:var(--green)}
+.tx-amount.neg{color:var(--red)}
+.tx-bal{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;margin-top:2px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
+.empty-title{font-size:1rem;font-weight:700;margin-bottom:.4rem;color:var(--muted2)}
+.empty-sub{font-size:.82rem;line-height:1.5}
+
+/* FLOATING IMPORT BTN */
+.fab{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gold);color:#0a0600;border:none;border-radius:50px;padding:.75rem 1.25rem;font-size:.88rem;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 24px rgba(232,160,32,.35);z-index:200;transition:all .2s}
+.fab:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 28px rgba(232,160,32,.5)}
+.fab:active{transform:translateY(0)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:var(--r2);padding:1.5rem;width:100%;max-width:440px;transform:translateY(20px);transition:transform .25s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-title{font-size:1rem;font-weight:800}
+.modal-close{background:var(--s3);border:1px solid var(--border);color:var(--muted2);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--r2);padding:2.5rem 1rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--gold);background:rgba(232,160,32,.06)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.drop-icon{font-size:2rem;margin-bottom:.75rem;opacity:.7}
+.drop-title{font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+.drop-sub{font-size:.78rem;color:var(--muted2)}
+.modal-info{margin-top:1rem;font-size:.78rem;color:var(--muted);line-height:1.6;background:var(--s2);border-radius:var(--r);padding:.75rem}
+.progress-wrap{margin-top:1rem;display:none}
+.progress-bar{height:4px;background:var(--s3);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:4px;width:0;transition:width .3s}
+.progress-label{font-size:.75rem;color:var(--muted2);margin-top:.4rem}
+
+/* TX detail expand */
+.tx-item.expanded{background:var(--s2)}
+.tx-detail{font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;padding:.5rem 1rem .75rem calc(1rem + 36px + .75rem);display:none;line-height:1.7;word-break:break-all}
+.tx-item.expanded+.tx-detail{display:block}
+
+/* CAT ICON COLORS */
+.ci-market{background:rgba(34,197,94,.12);color:#4ade80}
+.ci-food{background:rgba(249,115,22,.12);color:#fb923c}
+.ci-cafe{background:rgba(168,85,247,.12);color:#c084fc}
+.ci-tin{background:rgba(0,200,150,.12);color:#00c896}
+.ci-tout{background:rgba(240,64,96,.12);color:#f04060}
+.ci-sub{background:rgba(64,128,255,.12);color:#60a0ff}
+.ci-transit{background:rgba(6,182,212,.12);color:#22d3ee}
+.ci-gold{background:rgba(232,160,32,.12);color:#e8a020}
+.ci-bill{background:rgba(100,116,139,.12);color:#94a3b8}
+.ci-scooter{background:rgba(236,72,153,.12);color:#f472b6}
+.ci-atm{background:rgba(148,163,184,.12);color:#94a3b8}
+.ci-iade{background:rgba(16,185,129,.12);color:#34d399}
+.ci-award{background:rgba(251,191,36,.12);color:#fbbf24}
+.ci-fun{background:rgba(139,92,246,.12);color:#a78bfa}
+.ci-fuel{background:rgba(239,68,68,.12);color:#f87171}
+.ci-other{background:rgba(90,102,128,.12);color:#5a6680}
+
+/* TOAST */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:.6rem 1.2rem;border-radius:40px;font-size:.8rem;font-weight:600;z-index:400;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px}
+
+/* LOAD MORE */
+.load-more-btn{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:.7rem;border-radius:var(--r);font-size:.8rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;margin-top:6px;transition:all .2s}
+.load-more-btn:hover{background:var(--s3);color:var(--text)}
+
+/* TOP GAP */
+.section-gap{height:1.25rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">para<span>takip</span></div>
+  <div class="header-actions">
+    <div class="sync-dot" id="syncDot" title="Senkron durumu"></div>
+    <button class="icon-btn" onclick="syncData()" title="Senkronize et">⟳</button>
+    <button class="icon-btn" onclick="exportJSON()" title="JSON dışa aktar">↓</button>
+  </div>
+</header>
+
+<main>
+  <!-- PERIOD -->
+  <div class="period-bar" id="periodBar"></div>
+
+  <!-- CARDS -->
+  <div class="cards" id="summaryCards"></div>
+
+  <!-- CHARTS -->
+  <div class="charts" id="chartsSection">
+    <div class="chart-box">
+      <div class="chart-title">Kategori Dağılımı</div>
+      <div class="chart-wrap"><canvas id="catChart"></canvas></div>
+      <div class="cat-legend" id="catLegend"></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Günlük Harcama</div>
+      <div class="chart-wrap"><canvas id="dayChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="tx-header">
+    <div class="tx-title">İşlemler</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Ara..." oninput="renderTransactions()">
+    </div>
+  </div>
+  <div class="filter-row" id="filterRow"></div>
+  <div class="section-gap"></div>
+  <div class="tx-list" id="txList"></div>
+
+  <div style="height:5rem"></div>
+</main>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()">
+  <span>📄</span> PDF Yükle
+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Hesap Ekstresi Yükle</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="drop-zone" id="dropZone">
+      <input type="file" accept=".pdf" id="fileInput" onchange="handleFile(event)">
+      <div class="drop-icon">📄</div>
+      <div class="drop-title">PDF'i buraya sürükle veya tıkla</div>
+      <div class="drop-sub">Fibabanka hesap ekstresi destekleniyor</div>
+    </div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">İşleniyor...</div>
+    </div>
+    <div class="modal-info">
+      📌 PDF sadece tarayıcında işlenir, hiçbir sunucuya gönderilmez. Veriler Google Sheets'e kaydedilir.
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// ⚙️  AYARLAR — Sadece burası değiştirilir
+// ============================================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVxxJBXLA1YNZdpBt5Vp-NTJNN_Araefk_GFUSQ0eFxoym5ffpE9FyI1bSOGrv62HNKA/exec';
+// Örnek: 'https://script.google.com/macros/s/AKfycbXXX.../exec'
+// Boş bırakırsan sadece local çalışır (sync olmaz)
+// ============================================================
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ---- CATEGORIES ----
+const CATS = {
+  'Market':        { icon:'🛒', cls:'ci-market',  kw:['MIGROS','MIGROSONE','DIJITAL PLAT','MONEYPAY/MIGROS','MONEYPAY /MIGROS','MONEYPAY /DIJITAL','ANS GIDA','CANER MARKET'] },
+  'Yemek Sipariş': { icon:'🍔', cls:'ci-food',    kw:['YEMEKSEPETI','TRENDYOLYEMEK','TRENDYOL YEMEK','S/TRENDYOL YEMEK','PARAM/TRENDYOL','GETIR','/GETIR'] },
+  'Kafe & Restoran':{ icon:'☕', cls:'ci-cafe',    kw:['LOKANTA','PASTANE','COFFEE','CAFE','KAFE','KAHVE','SIMIT','TOSTCU','BUFE','GIRITLI','AKAT TICARET'] },
+  'Gelen Transfer': { icon:'💚', cls:'ci-tin',     kw:['GELEN FAST'] },
+  'Giden Transfer': { icon:'💸', cls:'ci-tout',    kw:['GİDEN FAST','GIDEN FAST'] },
+  'Abonelik':       { icon:'📱', cls:'ci-sub',     kw:['YOUTUBE','CLAUDE','WORKSPACE','SUBSCRIPTION','NETFLIX','SPOTIFY','APPLE','PAYCELL/FATURA','TURKCELL','VODAFONE'] },
+  'Ulaşım':         { icon:'🚌', cls:'ci-transit', kw:['KENTKART','OBILET','TURAS TURIZM','BATI ANTALYA TURIZ','CALHAN DINLENME'] },
+  'Altın & Döviz':  { icon:'🥇', cls:'ci-gold',   kw:['XAU','ALINAN DÖVİZ','ALINAN DOVIZ','KAMBIYO','SATILAN DÖV'] },
+  'Fatura':         { icon:'📄', cls:'ci-bill',    kw:['TURK.NET','AYDEM','KURUM FATURA','FATURA ODEME','AVEVA','AVEA COM'] },
+  'Scooter':        { icon:'🛴', cls:'ci-scooter', kw:['MARSSCOOTER','SCOOTER'] },
+  'ATM':            { icon:'🏧', cls:'ci-atm',     kw:['ATM PARA CEKME'] },
+  'İade':           { icon:'↩️', cls:'ci-iade',    kw:['İPTALİ','IADE İŞLEMİ','SATIŞ İADE'] },
+  'Ödül':           { icon:'🎁', cls:'ci-award',   kw:['KAMPANYASI ÖDÜLÜ','ÖDÜLÜ'] },
+  'Eğlence':        { icon:'🎮', cls:'ci-fun',     kw:['BOWLI','BOWLING','SINEMA','AVM ANTALYA'] },
+  'Akaryakıt':      { icon:'⛽', cls:'ci-fuel',    kw:['PETROL','AKARYAKIT','SHELL','OPET','TOTAL'] },
+  'Diğer':          { icon:'•',  cls:'ci-other',   kw:[] },
+};
+
+const CAT_COLORS = ['#e8a020','#00c896','#f04060','#4080ff','#9060f0','#00d4ff','#ff6040','#60d060','#c0a000','#ff60a0','#80c0ff','#40e0a0','#ff8040','#a040c0','#60ffb0','#d06020'];
+
+// ---- STATE ----
+let allTx = JSON.parse(localStorage.getItem('paratakip_tx') || '[]');
+let activePeriod = 'all';
+let activeFilter = 'all';
+let visibleCount = 40;
+let catChart, dayChart;
+
+// ---- CATEGORIZE ----
+function categorize(desc) {
+  const d = desc.toUpperCase();
+  for (const [cat, data] of Object.entries(CATS)) {
+    if (cat === 'Diğer') continue;
+    if (data.kw.some(k => d.includes(k))) return cat;
+  }
+  return 'Diğer';
+}
+
+// ---- PERIODS ----
+function getPeriods() {
+  const map = {};
+  for (const t of allTx) {
+    const [d,m,y] = t.date.split('.');
+    const key = `${y}-${m}`;
+    const label = new Date(+y,+m-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
+    if (!map[key]) map[key] = label;
+  }
+  return Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
+}
+
+function filteredByPeriod() {
+  if (activePeriod === 'all') return allTx;
+  return allTx.filter(t => {
+    const [d,m,y] = t.date.split('.');
+    return `${y}-${m}` === activePeriod;
+  });
+}
+
+// ---- RENDER PERIOD BAR ----
+function renderPeriodBar() {
+  const bar = document.getElementById('periodBar');
+  const periods = getPeriods();
+  let html = `<button class="period-btn ${activePeriod==='all'?'active':''}" onclick="setPeriod('all')">Tümü</button>`;
+  for (const [key, label] of periods) {
+    html += `<button class="period-btn ${activePeriod===key?'active':''}" onclick="setPeriod('${key}')">${label}</button>`;
+  }
+  bar.innerHTML = html;
+}
+
+function setPeriod(p) {
+  activePeriod = p;
+  activeFilter = 'all';
+  visibleCount = 40;
+  renderPeriodBar();
+  renderCards();
+  renderCharts();
+  renderTransactions();
+}
+
+// ---- FMT ----
+function fmt(n) {
+  return Math.abs(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺';
+}
+function fmtSign(n) {
+  return (n >= 0 ? '+' : '-') + fmt(n);
+}
+
+// ---- RENDER CARDS ----
+function renderCards() {
+  const tx = filteredByPeriod();
+  const gelir = tx.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+  const gider = tx.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0);
+  const net = gelir + gider;
+  const balance = tx.length ? tx[tx.length-1].balance : 0;
+
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="card c-gold">
+      <div class="card-label">Bakiye</div>
+      <div class="card-value neutral mono">${fmt(balance)}</div>
+      <div class="card-sub">Dönem sonu</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-label">Toplam Gelir</div>
+      <div class="card-value positive mono">${fmt(gelir)}</div>
+      <div class="card-sub">${tx.filter(t=>t.amount>0).length} işlem</div>
+    </div>
+    <div class="card c-red">
+      <div class="card-label">Toplam Gider</div>
+      <div class="card-value negative mono">${fmt(Math.abs(gider))}</div>
+      <div class="card-sub">${tx.filter(t=>t.amount<0).length} işlem</div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-label">Net</div>
+      <div class="card-value ${net>=0?'positive':'negative'} mono">${fmtSign(net)}</div>
+      <div class="card-sub">${tx.length} toplam işlem</div>
+    </div>`;
+}
+
+// ---- RENDER CHARTS ----
+function renderCharts() {
+  const tx = filteredByPeriod();
+  renderCatChart(tx);
+  renderDayChart(tx);
+}
+
+function renderCatChart(tx) {
+  const expenses = tx.filter(t=>t.amount<0);
+  const map = {};
+  for (const t of expenses) {
+    map[t.category] = (map[t.category]||0) + Math.abs(t.amount);
+  }
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const labels = sorted.map(e=>e[0]);
+  const data = sorted.map(e=>e[1]);
+  const colors = CAT_COLORS.slice(0,labels.length);
+
+  const legend = document.getElementById('catLegend');
+  legend.innerHTML = sorted.map((e,i)=>
+    `<div class="cat-legend-row">
+      <div class="cat-dot" style="background:${colors[i]}"></div>
+      <div class="cat-name">${e[0]}</div>
+      <div class="cat-amt">${fmt(e[1])}</div>
+    </div>`
+  ).join('');
+
+  if (catChart) catChart.destroy();
+  if (!data.length) return;
+
+  catChart = new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:4 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{ legend:{display:false}, tooltip:{
+        callbacks:{label:ctx=>' '+ctx.label+': '+fmt(ctx.raw)}
+      }},
+    }
+  });
+}
+
+function renderDayChart(tx) {
+  const map = {};
+  for (const t of tx) {
+    if (t.amount < 0) {
+      const key = t.date.substring(0,5);
+      map[key] = (map[key]||0) + Math.abs(t.amount);
+    }
+  }
+  const sorted = Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0]));
+  const labels = sorted.map(e=>e[0]);
+  const data = sorted.map(e=>e[1]);
+
+  if (dayChart) dayChart.destroy();
+  if (!data.length) return;
+
+  dayChart = new Chart(document.getElementById('dayChart'), {
+    type: 'bar',
+    data: { labels, datasets:[{ data, backgroundColor:'rgba(232,160,32,.6)', borderColor:'rgba(232,160,32,.9)', borderWidth:1, borderRadius:3 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}} },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#5a6680',font:{size:10}} },
+        y:{ grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v} }
+      }
+    }
+  });
+}
+
+// ---- FILTER BUTTONS ----
+function renderFilterRow() {
+  const tx = filteredByPeriod();
+  const cats = [...new Set(tx.map(t=>t.category))].sort();
+  let html = `<button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">Tümü</button>
+    <button class="filter-btn ${activeFilter==='gelir'?'active':''}" onclick="setFilter('gelir')">💚 Gelir</button>
+    <button class="filter-btn ${activeFilter==='gider'?'active':''}" onclick="setFilter('gider')">💸 Gider</button>`;
+  for (const c of cats) {
+    const ico = CATS[c]?.icon || '•';
+    html += `<button class="filter-btn ${activeFilter===c?'active':''}" onclick="setFilter('${c}')">${ico} ${c}</button>`;
+  }
+  document.getElementById('filterRow').innerHTML = html;
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  visibleCount = 40;
+  renderFilterRow();
+  renderTransactions();
+}
+
+// ---- RENDER TRANSACTIONS ----
+function renderTransactions() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let tx = filteredByPeriod();
+
+  if (activeFilter === 'gelir') tx = tx.filter(t=>t.amount>0);
+  else if (activeFilter === 'gider') tx = tx.filter(t=>t.amount<0);
+  else if (activeFilter !== 'all') tx = tx.filter(t=>t.category===activeFilter);
+
+  if (search) tx = tx.filter(t=>t.description.toLowerCase().includes(search)||t.category.toLowerCase().includes(search));
+
+  const reversed = [...tx].reverse();
+  const shown = reversed.slice(0, visibleCount);
+
+  if (!shown.length) {
+    document.getElementById('txList').innerHTML = allTx.length
+      ? '<div class="no-results">Sonuç bulunamadı</div>'
+      : `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Henüz işlem yok</div><div class="empty-sub">PDF'ini yükleyerek başla</div></div>`;
+    renderFilterRow();
+    return;
+  }
+
+  const rows = shown.map(t => {
+    const catData = CATS[t.category] || CATS['Diğer'];
+    const isPos = t.amount >= 0;
+    return `
+      <div class="tx-item" onclick="toggleDetail(this)">
+        <div class="tx-icon ${catData.cls}">${catData.icon}</div>
+        <div class="tx-info">
+          <div class="tx-desc">${escHtml(cleanDesc(t.description))}</div>
+          <div class="tx-meta">
+            <span class="tx-date">${t.date}</span>
+            <span class="tx-cat-badge">${t.category}</span>
+          </div>
+        </div>
+        <div>
+          <div class="tx-amount ${isPos?'pos':'neg'}">${isPos?'+':''} ${fmt(t.amount)}</div>
+          <div class="tx-bal">${fmt(t.balance)}</div>
+        </div>
+      </div>
+      <div class="tx-detail">${escHtml(t.description)}</div>`;
+  }).join('');
+
+  let extra = '';
+  if (reversed.length > visibleCount) {
+    extra = `<button class="load-more-btn" onclick="loadMore()">+ ${reversed.length - visibleCount} işlem daha göster</button>`;
+  }
+
+  document.getElementById('txList').innerHTML = rows + extra;
+  renderFilterRow();
+}
+
+function loadMore() { visibleCount += 40; renderTransactions(); }
+
+function toggleDetail(el) {
+  el.classList.toggle('expanded');
+}
+
+function cleanDesc(d) {
+  return d
+    .replace(/YURT (ICI|DISI) POS SATIS KART NO:[\d\*]+ POS İŞYERİ ADI:/i,'')
+    .replace(/İŞLEM TARİHİ:[\d ]+PROVİZYON NO:[\d ]+RRN:[\d ]+/gi,'')
+    .replace(/GELEN FAST\. - GONDEREN :/i,'← ')
+    .replace(/GİDEN FAST\. ALICI:/i,'→ ')
+    .replace(/- BANKAADI:[^\-]+-/g,'')
+    .replace(/FAST SORGU NO:[\d]+- ALICI IBAN:[\w]+/g,'')
+    .replace(/KAYNAK :MOBIL - AÇIKLAMA :/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ---- FULL RENDER ----
+function fullRender() {
+  renderPeriodBar();
+  renderCards();
+  renderCharts();
+  renderTransactions();
+}
+
+// ---- PDF PARSING ----
+async function extractTextFromPDF(file) {
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let fullText = '';
+  for (let pn = 1; pn <= pdf.numPages; pn++) {
+    const page = await pdf.getPage(pn);
+    const content = await page.getTextContent();
+    const items = content.items.slice().sort((a,b) => {
+      const yDiff = b.transform[5] - a.transform[5];
+      if (Math.abs(yDiff) > 3) return yDiff;
+      return a.transform[4] - b.transform[4];
+    });
+    let lastY = null;
+    for (const item of items) {
+      const y = Math.round(item.transform[5]);
+      if (lastY !== null && Math.abs(y - lastY) > 3) fullText += '\n';
+      fullText += item.str + ' ';
+      lastY = y;
+    }
+    fullText += '\n---PAGE---\n';
+  }
+  return fullText;
+}
+
+function parseTransactions(fullText) {
+  const dateRx = /^\d{2}\.\d{2}\.\d{4}$/;
+  const amtRx = /^-?[\d,]+\.\d{2}$/;
+  const skipWords = ['fibabanka','hesap ekstresi','444 88 88','fibabanka.com','müşteri','adı soyadı','şube','döviz','iban','ekstre','dönem','tarih','valör','açıklama','hareket','bakiye','dekont','---page---'];
+
+  const lines = fullText.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && !skipWords.some(w => l.toLowerCase().includes(w)));
+
+  const txs = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    if (!dateRx.test(lines[i])) { i++; continue; }
+
+    const tarih = lines[i++];
+    let valor = tarih;
+    if (i < lines.length && dateRx.test(lines[i])) valor = lines[i++];
+
+    const descParts = [];
+    while (i < lines.length && !amtRx.test(lines[i]) && !dateRx.test(lines[i])) {
+      const l = lines[i];
+      if (!/^\d{5,}$/.test(l) && l.length > 1) descParts.push(l);
+      i++;
+    }
+
+    let amount = 0, balance = 0;
+    if (i < lines.length && amtRx.test(lines[i])) {
+      amount = parseFloat(lines[i++].replace(/,/g, ''));
+    }
+    if (i < lines.length && amtRx.test(lines[i])) {
+      balance = parseFloat(lines[i++].replace(/,/g, ''));
+    }
+    while (i < lines.length && /^[\d\-]+$/.test(lines[i])) i++;
+
+    const description = descParts.join(' ').replace(/\s+/g,' ').trim();
+    if (!description || (amount === 0 && balance === 0)) continue;
+
+    txs.push({
+      id: `${tarih}_${amount}_${Math.random().toString(36).substr(2,4)}`,
+      date: tarih,
+      valor,
+      description,
+      amount,
+      balance,
+      category: categorize(description),
+      type: amount >= 0 ? 'gelir' : 'gider'
+    });
+  }
+
+  return txs;
+}
+
+// ---- FILE HANDLING ----
+async function handleFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  await processPDF(file);
+}
+
+async function processPDF(file) {
+  const pw = document.getElementById('progressWrap');
+  const pf = document.getElementById('progressFill');
+  const pl = document.getElementById('progressLabel');
+  pw.style.display = 'block';
+  pf.style.width = '10%';
+  pl.textContent = 'PDF okunuyor...';
+
+  try {
+    pf.style.width = '30%';
+    const text = await extractTextFromPDF(file);
+    pf.style.width = '60%';
+    pl.textContent = 'İşlemler ayrıştırılıyor...';
+    const newTxs = parseTransactions(text);
+    pf.style.width = '80%';
+
+    if (!newTxs.length) {
+      toast('⚠️ İşlem bulunamadı. PDF formatını kontrol et.');
+      pw.style.display = 'none';
+      return;
+    }
+
+    const existingIds = new Set(allTx.map(t => `${t.date}_${t.amount}_${t.description.substring(0,20)}`));
+    const fresh = newTxs.filter(t => {
+      const key = `${t.date}_${t.amount}_${t.description.substring(0,20)}`;
+      return !existingIds.has(key);
+    });
+
+    allTx = [...allTx, ...fresh].sort((a,b) => {
+      const da = a.date.split('.').reverse().join('');
+      const db = b.date.split('.').reverse().join('');
+      return da.localeCompare(db) || a.amount - b.amount;
+    });
+
+    saveLocal();
+    pf.style.width = '90%';
+    pl.textContent = 'Kaydediliyor...';
+
+    await syncToSheets();
+
+    pf.style.width = '100%';
+    pl.textContent = `✅ ${fresh.length} yeni işlem eklendi (${newTxs.length} toplam)`;
+
+    setTimeout(() => {
+      closeModal();
+      pw.style.display = 'none';
+      pf.style.width = '0%';
+      document.getElementById('fileInput').value = '';
+    }, 1500);
+
+    fullRender();
+    toast(`✅ ${fresh.length} yeni işlem eklendi`);
+
+  } catch(e) {
+    console.error(e);
+    pl.textContent = '❌ Hata: ' + e.message;
+    toast('❌ PDF işlenirken hata oluştu');
+  }
+}
+
+// ---- LOCAL STORAGE ----
+function saveLocal() {
+  localStorage.setItem('paratakip_tx', JSON.stringify(allTx));
+}
+
+// ---- SYNC ----
+async function syncData() {
+  setSync('syncing');
+  try {
+    if (APPS_SCRIPT_URL) {
+      const res = await fetch(APPS_SCRIPT_URL + '?action=read');
+      const remote = await res.json();
+      if (Array.isArray(remote) && remote.length) {
+        const existingIds = new Set(allTx.map(t=>t.id));
+        const newOnes = remote.filter(t=>!existingIds.has(t.id));
+        if (newOnes.length) {
+          allTx = [...allTx, ...newOnes].sort((a,b)=>{
+            const da=a.date.split('.').reverse().join('');
+            const db=b.date.split('.').reverse().join('');
+            return da.localeCompare(db);
+          });
+          saveLocal();
+          fullRender();
+          toast(`🔄 ${newOnes.length} yeni işlem senkronize edildi`);
+        } else {
+          toast('✅ Veri güncel');
+        }
+      }
+    } else {
+      toast('⚠️ Apps Script URL tanımlanmamış');
+    }
+    setSync('ok');
+  } catch(e) {
+    setSync('error');
+    toast('❌ Senkronizasyon hatası');
+  }
+}
+
+async function syncToSheets() {
+  if (!APPS_SCRIPT_URL) return;
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'bulk_add', transactions: allTx })
+    });
+    setSync('ok');
+  } catch(e) {
+    setSync('error');
+  }
+}
+
+function setSync(state) {
+  const dot = document.getElementById('syncDot');
+  dot.className = 'sync-dot ' + state;
+}
+
+// ---- EXPORT ----
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(allTx,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `paratakip_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('📥 JSON dosyası indirildi');
+}
+
+// ---- MODAL ----
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('fileInput').value = '';
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') processPDF(file);
+});
+
+// ---- TOAST ----
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ---- INIT ----
+if (allTx.length) {
+  setSync('ok');
+  fullRender();
+} else {
+  renderPeriodBar();
+  renderCards();
+  renderTransactions();
+  setSync('ok');
+}
+</script>
+</body>
+</html>
