@@ -577,34 +577,43 @@ function fullRender() {
 async function extractTextFromPDF(file) {
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  let allText = '';
+  const allItems = [];
   for (let pn = 1; pn <= pdf.numPages; pn++) {
     const page = await pdf.getPage(pn);
     const content = await page.getTextContent();
     for (const item of content.items) {
-      if ('str' in item) allText += (item.str || '') + ' ';
+      if ('str' in item && item.str && item.str.trim()) {
+        allItems.push({ page: pn, y: item.transform[5], x: item.transform[4], str: item.str.trim() });
+      }
     }
-    allText += ' ';
   }
-  return allText;
+  // Sort by page → Y descending (top of page first) → X ascending (left to right)
+  allItems.sort((a, b) => {
+    if (a.page !== b.page) return a.page - b.page;
+    if (Math.abs(b.y - a.y) > 2) return b.y - a.y;
+    return a.x - b.x;
+  });
+  return allItems.map(i => i.str).join(' ');
 }
 
 function parseTransactions(fullText) {
-  const headerIdx = fullText.search(/Dekont\s*No/i);
-  const text = headerIdx > -1 ? fullText.substring(headerIdx + 10) : fullText;
-
+  // Match: DD.MM.YYYY <spaces> DD.MM.YYYY <spaces>
+  // The period header "11.04.2026 - 11.05.2026" won't match (has " - " between dates)
   const datePairRx = /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})\s+/g;
   const positions = [];
   let m;
-  while ((m = datePairRx.exec(text)) !== null) {
+  while ((m = datePairRx.exec(fullText)) !== null) {
+    // Skip if preceded by a dash (part of date range like "11.04.2026 - 11.05.2026")
+    const before = fullText.substring(Math.max(0, m.index - 3), m.index);
+    if (before.trim().endsWith('-')) continue;
     positions.push({ index: m.index, contentStart: m.index + m[0].length, date: m[1], valor: m[2] });
   }
 
   const txs = [];
   for (let i = 0; i < positions.length; i++) {
     const start = positions[i].contentStart;
-    const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
-    const chunk = text.substring(start, end);
+    const end = i + 1 < positions.length ? positions[i + 1].index : fullText.length;
+    const chunk = fullText.substring(start, end);
 
     const numRx = /-?[\d,]+\.\d{2}/g;
     const nums = [...chunk.matchAll(numRx)];
@@ -612,8 +621,8 @@ function parseTransactions(fullText) {
 
     const amount  = parseFloat(nums[nums.length - 2][0].replace(/,/g, ''));
     const balance = parseFloat(nums[nums.length - 1][0].replace(/,/g, ''));
-    const amtPos = nums[nums.length - 2].index;
-    const desc = chunk.substring(0, amtPos).replace(/\s+/g, ' ').trim();
+    const amtPos  = nums[nums.length - 2].index;
+    const desc    = chunk.substring(0, amtPos).replace(/\s+/g, ' ').trim();
 
     if (!desc || desc.length < 3) continue;
 
@@ -629,8 +638,7 @@ function parseTransactions(fullText) {
     });
   }
   return txs;
-}
-// ---- FILE HANDLING ----
+}// ---- FILE HANDLING ----
 async function handleFile(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -654,8 +662,11 @@ async function processPDF(file) {
     pf.style.width = '80%';
 
     if (!newTxs.length) {
-      toast('⚠️ İşlem bulunamadı. PDF formatını kontrol et.');
-      pw.style.display = 'none';
+      const sample = text.substring(0, 400).replace(/\s+/g,' ');
+      pl.textContent = '❌ İşlem bulunamadı. Konsola bak (F12).';
+      console.error('PDF PARSE FAILED. Text sample:', sample);
+      console.error('Date pairs found: check manually');
+      toast('⚠️ İşlem bulunamadı — F12 > Konsol > hata mesajını kopyala');
       return;
     }
 
