@@ -266,8 +266,8 @@ const CATS={
   'Diğer':          {icon:'•', cls:'ci-other',  kw:[]},
 };
 
-// These categories are EXCLUDED from normal income/expense stats
-const EXCL=['Gelen Transfer','Giden Transfer','Altın & Döviz'];
+// These categories are EXCLUDED from normal income/expense stats (only gold/forex)
+const EXCL=['Altın & Döviz'];
 const COLORS=['#e8a020','#00c896','#f04060','#4080ff','#9060f0','#00d4ff','#ff6040','#60d060','#c0a000','#ff60a0','#80c0ff','#40e0a0'];
 
 // Analysis category groups
@@ -363,8 +363,8 @@ function renderCards(){
   const net=incT-spT;
   document.getElementById('summaryCards').innerHTML=`
     <div class="card c-gold"><div class="card-label">Güncel Bakiye</div><div class="card-value neutral">${fmt(last)}</div><div class="card-sub">Dönem sonu · ${tx.length} işlem</div></div>
-    <div class="card c-red"><div class="card-label">Harcama</div><div class="card-value negative">${fmt(spT)}</div><div class="card-sub">${sp.length} işlem (transfer/altın hariç)</div></div>
-    <div class="card c-green"><div class="card-label">Gelir</div><div class="card-value positive">${fmt(incT)}</div><div class="card-sub">${inc.length} işlem (transfer/altın hariç)</div></div>
+    <div class="card c-red"><div class="card-label">Harcama</div><div class="card-value negative">${fmt(spT)}</div><div class="card-sub">${sp.length} işlem (altın/döviz hariç)</div></div>
+    <div class="card c-green"><div class="card-label">Gelir</div><div class="card-value positive">${fmt(incT)}</div><div class="card-sub">${inc.length} işlem (altın/döviz hariç)</div></div>
     <div class="card ${net>=0?'c-blue':'c-red'}"><div class="card-label">Net</div><div class="card-value ${net>=0?'positive':'negative'}">${net>=0?'+':''}${fmt(net)}</div><div class="card-sub">Gerçek gelir − harcama</div></div>`;
 }
 
@@ -543,8 +543,8 @@ function setFilter(f){filter=f;visible=40;renderFilters();renderTx();}
 function renderTx(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   let tx=byPeriod();
-  if(filter==='gelir')tx=tx.filter(t=>t.amount>0&&!['Gelen Transfer','Altın & Döviz'].includes(t.category));
-  else if(filter==='gider')tx=tx.filter(t=>t.amount<0&&!['Giden Transfer','Altın & Döviz'].includes(t.category));
+  if(filter==='gelir')tx=tx.filter(t=>t.amount>0&&t.category!=='Altın & Döviz');
+  else if(filter==='gider')tx=tx.filter(t=>t.amount<0&&t.category!=='Altın & Döviz');
   else if(filter==='transfer')tx=tx.filter(t=>['Gelen Transfer','Giden Transfer'].includes(t.category));
   else if(filter!=='all')tx=tx.filter(t=>t.category===filter);
   if(search)tx=tx.filter(t=>t.description.toLowerCase().includes(search)||t.category.toLowerCase().includes(search));
