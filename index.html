@@ -223,6 +223,15 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
     </div>
   </div>
 
+  <!-- GOLD SECTION -->
+  <div id="goldSection" style="display:none;margin-bottom:1.25rem">
+    <div class="chart-box">
+      <div class="chart-title">🥇 Altın & Döviz İşlemleri</div>
+      <div id="goldList" style="display:flex;flex-direction:column;gap:6px;margin-top:.5rem"></div>
+      <div id="goldSummary" style="margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border);display:flex;gap:1.5rem;flex-wrap:wrap"></div>
+    </div>
+  </div>
+
   <!-- TRANSACTIONS -->
   <div class="tx-header">
     <div class="tx-title">İşlemler</div>
@@ -357,6 +366,7 @@ function setPeriod(p) {
   renderPeriodBar();
   renderCards();
   renderCharts();
+  renderGold();
   renderTransactions();
 }
 
@@ -371,31 +381,45 @@ function fmtSign(n) {
 // ---- RENDER CARDS ----
 function renderCards() {
   const tx = filteredByPeriod();
-  const gelir = tx.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
-  const gider = tx.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0);
-  const net = gelir + gider;
+  const TRANSFER = ['Gelen Transfer','Giden Transfer'];
+  const GOLD = ['Altın & Döviz'];
+  const EXCL = [...TRANSFER, ...GOLD];
+
+  // Real spending (no transfers, no gold)
+  const spendTx = tx.filter(t => t.amount < 0 && !EXCL.includes(t.category));
+  const spendTotal = spendTx.reduce((s,t) => s + Math.abs(t.amount), 0);
+
+  // Real income (no transfers, no gold)
+  const incTx = tx.filter(t => t.amount > 0 && !EXCL.includes(t.category));
+  const incTotal = incTx.reduce((s,t) => s + t.amount, 0);
+
+  // Gold P&L
+  const goldTx = tx.filter(t => GOLD.includes(t.category));
+  const goldPL = goldTx.reduce((s,t) => s + t.amount, 0);
+
+  // Ending balance
   const balance = tx.length ? tx[tx.length-1].balance : 0;
 
   document.getElementById('summaryCards').innerHTML = `
     <div class="card c-gold">
-      <div class="card-label">Bakiye</div>
+      <div class="card-label">Güncel Bakiye</div>
       <div class="card-value neutral mono">${fmt(balance)}</div>
-      <div class="card-sub">Dönem sonu</div>
-    </div>
-    <div class="card c-green">
-      <div class="card-label">Toplam Gelir</div>
-      <div class="card-value positive mono">${fmt(gelir)}</div>
-      <div class="card-sub">${tx.filter(t=>t.amount>0).length} işlem</div>
+      <div class="card-sub">Dönem sonu • ${tx.length} işlem</div>
     </div>
     <div class="card c-red">
-      <div class="card-label">Toplam Gider</div>
-      <div class="card-value negative mono">${fmt(Math.abs(gider))}</div>
-      <div class="card-sub">${tx.filter(t=>t.amount<0).length} işlem</div>
+      <div class="card-label">Harcama</div>
+      <div class="card-value negative mono">${fmt(spendTotal)}</div>
+      <div class="card-sub">${spendTx.length} işlem (transfer/altın hariç)</div>
     </div>
-    <div class="card c-blue">
-      <div class="card-label">Net</div>
-      <div class="card-value ${net>=0?'positive':'negative'} mono">${fmtSign(net)}</div>
-      <div class="card-sub">${tx.length} toplam işlem</div>
+    <div class="card c-green">
+      <div class="card-label">Gelir</div>
+      <div class="card-value positive mono">${fmt(incTotal)}</div>
+      <div class="card-sub">${incTx.length} işlem (transfer/altın hariç)</div>
+    </div>
+    <div class="card ${goldPL>=0?'c-green':'c-red'}">
+      <div class="card-label">Altın K/Z</div>
+      <div class="card-value ${goldPL>=0?'positive':'negative'} mono">${goldPL>=0?'+':''}${fmt(goldPL)}</div>
+      <div class="card-sub">${goldTx.length} altın işlemi</div>
     </div>`;
 }
 
@@ -407,7 +431,8 @@ function renderCharts() {
 }
 
 function renderCatChart(tx) {
-  const expenses = tx.filter(t=>t.amount<0);
+  const EXCL = ['Gelen Transfer','Giden Transfer','Altın & Döviz'];
+  const expenses = tx.filter(t=>t.amount<0 && !EXCL.includes(t.category));
   const map = {};
   for (const t of expenses) {
     map[t.category] = (map[t.category]||0) + Math.abs(t.amount);
@@ -565,11 +590,42 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ---- GOLD SECTION ----
+function renderGold() {
+  const tx = filteredByPeriod();
+  const goldTx = tx.filter(t => t.category === 'Altın & Döviz');
+  const sec = document.getElementById('goldSection');
+  if (!goldTx.length) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+
+  const alim  = goldTx.filter(t => t.amount < 0);
+  const satim = goldTx.filter(t => t.amount > 0);
+  const alimT = alim.reduce((s,t) => s+Math.abs(t.amount),0);
+  const satimT = satim.reduce((s,t) => s+t.amount,0);
+  const pl = satimT - alimT;
+
+  document.getElementById('goldList').innerHTML = goldTx.map(t => `
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--s2);border-radius:var(--r)">
+      <div style="font-size:1.1rem">${t.amount<0?'🛒':'💰'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description.substring(0,60)}</div>
+        <div style="font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace">${t.date} &nbsp;${t.amount<0?'Alım':'Satım'}</div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;color:${t.amount<0?'var(--red)':'var(--green)'}">${t.amount<0?'-':'+'} ${fmt(t.amount)}</div>
+    </div>`).join('');
+
+  document.getElementById('goldSummary').innerHTML = `
+    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Toplam Alım</div><div style="font-family:'DM Mono',monospace;color:var(--red)">${fmt(alimT)}</div></div>
+    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Toplam Satım</div><div style="font-family:'DM Mono',monospace;color:var(--green)">${fmt(satimT)}</div></div>
+    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Kar / Zarar</div><div style="font-family:'DM Mono',monospace;color:${pl>=0?'var(--green)':'var(--red)'};font-weight:700">${pl>=0?'+':''}${fmt(pl)}</div></div>`;
+}
+
 // ---- FULL RENDER ----
 function fullRender() {
   renderPeriodBar();
   renderCards();
   renderCharts();
+  renderGold();
   renderTransactions();
 }
 
@@ -615,7 +671,7 @@ function parseTransactions(fullText) {
     const end = i + 1 < positions.length ? positions[i + 1].index : fullText.length;
     const chunk = fullText.substring(start, end);
 
-    const numRx = /-?[\d,]+\.\d{2}/g;
+    const numRx = /-?[\d,]+\.\d{2}(?![\d.])/g;
     const nums = [...chunk.matchAll(numRx)];
     if (nums.length < 2) continue;
 
@@ -625,6 +681,10 @@ function parseTransactions(fullText) {
     const desc    = chunk.substring(0, amtPos).replace(/\s+/g, ' ').trim();
 
     if (!desc || desc.length < 3) continue;
+
+    // Skip spurious entries from page headers
+    const headerWords = ['fibabanka','444 88 88','hesap ekstresi','müşteri numarası','adı soyadı'];
+    if (headerWords.some(w => desc.toLowerCase().includes(w))) continue;
 
     txs.push({
       id: `${positions[i].date}_${amount}_${Math.random().toString(36).substr(2,4)}`,
