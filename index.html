@@ -6,7 +6,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Para Takip">
 <meta name="theme-color" content="#07090f">
 <title>Para Takip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,129 +13,99 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg: #07090f;
-  --s1: #0d1120;
-  --s2: #131929;
-  --s3: #1a2238;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e4e8f0;
-  --muted: #5a6680;
-  --muted2: #8090b0;
-  --gold: #e8a020;
-  --gold2: #ffd060;
-  --green: #00c896;
-  --red: #f04060;
-  --blue: #4080ff;
-  --purple: #9060f0;
-  --r: 10px;
-  --r2: 16px;
-}
+:root{--bg:#07090f;--s1:#0d1120;--s2:#131929;--s3:#1a2238;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#e4e8f0;--muted:#5a6680;--muted2:#8090b0;--gold:#e8a020;--gold2:#ffd060;--green:#00c896;--red:#f04060;--blue:#4080ff;--r:10px;--r2:16px}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-.mono{font-family:'DM Mono',monospace}
-
-/* HEADER */
 header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 1.25rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-.logo{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;color:var(--gold2)}
-.logo span{color:var(--muted2);font-weight:400}
+.logo{font-size:1.1rem;font-weight:800;letter-spacing:-.02em;color:var(--gold2)}.logo span{color:var(--muted2);font-weight:400}
 .header-actions{display:flex;gap:8px;align-items:center}
-.icon-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;flex-shrink:0}
-.icon-btn:hover{background:var(--border2);border-color:rgba(255,255,255,0.2)}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:2px;transition:background .3s}
-.sync-dot.ok{background:var(--green)}
-.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
-.sync-dot.error{background:var(--red)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+.sync-dot.ok{background:var(--green)}.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}.sync-dot.error{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* MAIN */
+.icon-btn{background:var(--s3);border:1px solid var(--border2);color:var(--text);width:36px;height:36px;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s}
+.icon-btn:hover{background:var(--border2)}
 main{max-width:900px;margin:0 auto;padding:1.25rem}
-
-/* PERIOD BAR */
 .period-bar{display:flex;gap:6px;margin-bottom:1.25rem;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .period-bar::-webkit-scrollbar{display:none}
 .period-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:6px 14px;border-radius:40px;font-size:.78rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
 .period-btn.active{background:var(--gold);border-color:var(--gold);color:#0a0600}
-
-/* SUMMARY CARDS */
+.invest-btn{border-color:rgba(232,160,32,.3) !important;color:var(--gold) !important}
+.invest-btn.active{background:rgba(232,160,32,.15) !important;border-color:var(--gold) !important;color:var(--gold2) !important}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
 @media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r2) var(--r2) 0 0}
-.card.c-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
-.card.c-green::before{background:var(--green)}
-.card.c-red::before{background:var(--red)}
-.card.c-blue::before{background:var(--blue)}
-.card-label{font-size:.72rem;color:var(--muted2);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.4rem}
-.card-value{font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:500;line-height:1}
-.card-value.positive{color:var(--green)}
-.card-value.negative{color:var(--red)}
-.card-value.neutral{color:var(--gold2)}
-.card-sub{font-size:.7rem;color:var(--muted);margin-top:.35rem}
-
-/* CHARTS */
+.card.c-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}.card.c-green::before{background:var(--green)}.card.c-red::before{background:var(--red)}.card.c-blue::before{background:var(--blue)}
+.card-label{font-size:.7rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem}
+.card-value{font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:500;line-height:1}
+.card-value.positive{color:var(--green)}.card-value.negative{color:var(--red)}.card-value.neutral{color:var(--gold2)}
+.card-sub{font-size:.68rem;color:var(--muted);margin-top:.35rem}
 .charts{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-bottom:1.25rem}
 @media(max-width:600px){.charts{grid-template-columns:1fr}}
 .chart-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1rem}
-.chart-title{font-size:.78rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.9rem}
+.chart-title{font-size:.75rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.9rem}
 .chart-wrap{position:relative;height:180px}
-
-/* CATEGORY LEGEND */
-.cat-legend{display:flex;flex-direction:column;gap:5px;margin-top:.6rem;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--s3) transparent}
+.cat-legend{display:flex;flex-direction:column;gap:5px;margin-top:.6rem;max-height:120px;overflow-y:auto;scrollbar-width:thin}
 .cat-legend-row{display:flex;align-items:center;gap:7px;font-size:.75rem}
 .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .cat-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cat-amt{font-family:'DM Mono',monospace;color:var(--muted2);font-size:.72rem}
-
-/* TRANSACTIONS */
+/* INVEST VIEW */
+.invest-view{display:none;margin-bottom:1rem}
+.invest-view.show{display:block}
+.invest-stats{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.invest-stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:.9rem 1.1rem;flex:1;min-width:110px}
+.invest-stat-label{font-size:.68rem;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.invest-stat-val{font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500}
+.invest-list{display:flex;flex-direction:column;gap:4px}
+.invest-row{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;display:flex;align-items:center;gap:.75rem}
+.invest-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ibuy{background:rgba(240,64,96,.12);color:var(--red)}.isell{background:rgba(0,200,150,.12);color:var(--green)}.ifee{background:rgba(90,102,128,.12);color:var(--muted2)}
+.invest-info{flex:1;min-width:0}
+.invest-desc{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.invest-date{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
+/* TX */
 .tx-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.85rem;flex-wrap:wrap}
-.tx-title{font-size:.78rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tx-title{font-size:.75rem;color:var(--muted2);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .search-wrap{position:relative;flex:1;min-width:140px;max-width:260px}
 .search-wrap input{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px 7px 30px;border-radius:var(--r);font-size:.82rem;font-family:'Syne',sans-serif;outline:none;transition:border .2s}
 .search-wrap input:focus{border-color:var(--border2)}
 .search-wrap input::placeholder{color:var(--muted)}
 .search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
-.filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-bottom:1rem}
 .filter-row::-webkit-scrollbar{display:none}
 .filter-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:5px 10px;border-radius:40px;font-size:.72rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s}
 .filter-btn.active{background:var(--s3);border-color:var(--border2);color:var(--text)}
-
-/* TX LIST */
 .tx-list{display:flex;flex-direction:column;gap:3px}
 .tx-item{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;cursor:default;transition:background .15s}
-.tx-item:hover{background:var(--s2)}
-.tx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--s3)}
+.tx-item:hover{background:var(--s2)}.tx-item.expanded{background:var(--s2)}
+.tx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
 .tx-info{flex:1;min-width:0}
-.tx-desc{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.tx-desc{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{display:flex;align-items:center;gap:6px;margin-top:2px}
 .tx-date{font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace}
 .tx-cat-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--muted2);letter-spacing:.04em;text-transform:uppercase}
 .tx-amount{font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;text-align:right;flex-shrink:0}
-.tx-amount.pos{color:var(--green)}
-.tx-amount.neg{color:var(--red)}
+.tx-amount.pos{color:var(--green)}.tx-amount.neg{color:var(--red)}
 .tx-bal{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;margin-top:2px}
-
-/* EMPTY STATE */
+.tx-detail{font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;padding:.5rem 1rem .75rem calc(1rem + 36px + .75rem);display:none;line-height:1.7;word-break:break-all}
+.tx-item.expanded+.tx-detail{display:block}
 .empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
 .empty-icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
 .empty-title{font-size:1rem;font-weight:700;margin-bottom:.4rem;color:var(--muted2)}
 .empty-sub{font-size:.82rem;line-height:1.5}
-
-/* FLOATING IMPORT BTN */
+.no-results{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+.load-more-btn{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:.7rem;border-radius:var(--r);font-size:.8rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;margin-top:6px;transition:all .2s}
+.load-more-btn:hover{background:var(--s3);color:var(--text)}
 .fab{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gold);color:#0a0600;border:none;border-radius:50px;padding:.75rem 1.25rem;font-size:.88rem;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;display:flex;align-items:center;gap:.5rem;box-shadow:0 4px 24px rgba(232,160,32,.35);z-index:200;transition:all .2s}
-.fab:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 28px rgba(232,160,32,.5)}
-.fab:active{transform:translateY(0)}
-
-/* MODAL */
+.fab:hover{background:var(--gold2);transform:translateY(-2px)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{background:var(--s1);border:1px solid var(--border2);border-radius:var(--r2);padding:1.5rem;width:100%;max-width:440px;transform:translateY(20px);transition:transform .25s}
 .modal-overlay.open .modal{transform:translateY(0)}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
 .modal-title{font-size:1rem;font-weight:800}
-.modal-close{background:var(--s3);border:1px solid var(--border);color:var(--muted2);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.modal-close{background:var(--s3);border:1px solid var(--border);color:var(--muted2);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .drop-zone{border:2px dashed var(--border2);border-radius:var(--r2);padding:2.5rem 1rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
 .drop-zone:hover,.drop-zone.drag{border-color:var(--gold);background:rgba(232,160,32,.06)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
@@ -148,112 +117,64 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
 .progress-bar{height:4px;background:var(--s3);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;background:var(--gold);border-radius:4px;width:0;transition:width .3s}
 .progress-label{font-size:.75rem;color:var(--muted2);margin-top:.4rem}
-
-/* TX detail expand */
-.tx-item.expanded{background:var(--s2)}
-.tx-detail{font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;padding:.5rem 1rem .75rem calc(1rem + 36px + .75rem);display:none;line-height:1.7;word-break:break-all}
-.tx-item.expanded+.tx-detail{display:block}
-
-/* CAT ICON COLORS */
-.ci-market{background:rgba(34,197,94,.12);color:#4ade80}
-.ci-food{background:rgba(249,115,22,.12);color:#fb923c}
-.ci-cafe{background:rgba(168,85,247,.12);color:#c084fc}
-.ci-tin{background:rgba(0,200,150,.12);color:#00c896}
-.ci-tout{background:rgba(240,64,96,.12);color:#f04060}
-.ci-sub{background:rgba(64,128,255,.12);color:#60a0ff}
-.ci-transit{background:rgba(6,182,212,.12);color:#22d3ee}
-.ci-gold{background:rgba(232,160,32,.12);color:#e8a020}
-.ci-bill{background:rgba(100,116,139,.12);color:#94a3b8}
-.ci-scooter{background:rgba(236,72,153,.12);color:#f472b6}
-.ci-atm{background:rgba(148,163,184,.12);color:#94a3b8}
-.ci-iade{background:rgba(16,185,129,.12);color:#34d399}
-.ci-award{background:rgba(251,191,36,.12);color:#fbbf24}
-.ci-fun{background:rgba(139,92,246,.12);color:#a78bfa}
-.ci-fuel{background:rgba(239,68,68,.12);color:#f87171}
-.ci-other{background:rgba(90,102,128,.12);color:#5a6680}
-
-/* TOAST */
 .toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:.6rem 1.2rem;border-radius:40px;font-size:.8rem;font-weight:600;z-index:400;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* NO RESULTS */
-.no-results{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px}
-
-/* LOAD MORE */
-.load-more-btn{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:.7rem;border-radius:var(--r);font-size:.8rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;margin-top:6px;transition:all .2s}
-.load-more-btn:hover{background:var(--s3);color:var(--text)}
-
-/* TOP GAP */
-.section-gap{height:1.25rem}
+.ci-market{background:rgba(34,197,94,.12);color:#4ade80}.ci-food{background:rgba(249,115,22,.12);color:#fb923c}.ci-cafe{background:rgba(168,85,247,.12);color:#c084fc}.ci-tin{background:rgba(0,200,150,.12);color:#00c896}.ci-tout{background:rgba(240,64,96,.12);color:#f04060}.ci-sub{background:rgba(64,128,255,.12);color:#60a0ff}.ci-transit{background:rgba(6,182,212,.12);color:#22d3ee}.ci-gold{background:rgba(232,160,32,.12);color:#e8a020}.ci-bill{background:rgba(100,116,139,.12);color:#94a3b8}.ci-scooter{background:rgba(236,72,153,.12);color:#f472b6}.ci-atm{background:rgba(148,163,184,.12);color:#94a3b8}.ci-iade{background:rgba(16,185,129,.12);color:#34d399}.ci-award{background:rgba(251,191,36,.12);color:#fbbf24}.ci-fun{background:rgba(139,92,246,.12);color:#a78bfa}.ci-fuel{background:rgba(239,68,68,.12);color:#f87171}.ci-other{background:rgba(90,102,128,.12);color:#5a6680}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">para<span>takip</span></div>
   <div class="header-actions">
-    <div class="sync-dot" id="syncDot" title="Senkron durumu"></div>
+    <div class="sync-dot" id="syncDot"></div>
     <button class="icon-btn" onclick="syncData()" title="Senkronize et">⟳</button>
-    <button class="icon-btn" onclick="exportJSON()" title="JSON dışa aktar">↓</button>
+    <button class="icon-btn" onclick="exportJSON()" title="Dışa aktar">↓</button>
   </div>
 </header>
-
 <main>
-  <!-- PERIOD -->
   <div class="period-bar" id="periodBar"></div>
-
-  <!-- CARDS -->
   <div class="cards" id="summaryCards"></div>
 
-  <!-- CHARTS -->
-  <div class="charts" id="chartsSection">
-    <div class="chart-box">
-      <div class="chart-title">Kategori Dağılımı</div>
-      <div class="chart-wrap"><canvas id="catChart"></canvas></div>
-      <div class="cat-legend" id="catLegend"></div>
+  <!-- NORMAL VIEW -->
+  <div id="normalView">
+    <div class="charts">
+      <div class="chart-box">
+        <div class="chart-title">Kategori Dağılımı</div>
+        <div class="chart-wrap"><canvas id="catChart"></canvas></div>
+        <div class="cat-legend" id="catLegend"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Günlük Harcama</div>
+        <div class="chart-wrap"><canvas id="dayChart"></canvas></div>
+      </div>
     </div>
-    <div class="chart-box">
-      <div class="chart-title">Günlük Harcama</div>
-      <div class="chart-wrap"><canvas id="dayChart"></canvas></div>
+    <div class="tx-header">
+      <div class="tx-title">İşlemler</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Ara..." oninput="renderTx()">
+      </div>
     </div>
+    <div class="filter-row" id="filterRow"></div>
+    <div class="tx-list" id="txList"></div>
   </div>
 
-  <!-- GOLD SECTION -->
-  <div id="goldSection" style="display:none;margin-bottom:1.25rem">
+  <!-- INVESTMENT VIEW -->
+  <div class="invest-view" id="investView">
+    <div class="invest-stats" id="investStats"></div>
     <div class="chart-box">
-      <div class="chart-title">🥇 Altın & Döviz İşlemleri</div>
-      <div id="goldList" style="display:flex;flex-direction:column;gap:6px;margin-top:.5rem"></div>
-      <div id="goldSummary" style="margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border);display:flex;gap:1.5rem;flex-wrap:wrap"></div>
+      <div class="chart-title">🥇 Altın &amp; Döviz İşlemleri</div>
+      <div class="invest-list" id="investList"></div>
     </div>
   </div>
-
-  <!-- TRANSACTIONS -->
-  <div class="tx-header">
-    <div class="tx-title">İşlemler</div>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Ara..." oninput="renderTransactions()">
-    </div>
-  </div>
-  <div class="filter-row" id="filterRow"></div>
-  <div class="section-gap"></div>
-  <div class="tx-list" id="txList"></div>
 
   <div style="height:5rem"></div>
 </main>
 
-<!-- FAB -->
-<button class="fab" onclick="openModal()">
-  <span>📄</span> PDF Yükle
-</button>
+<button class="fab" onclick="openModal()">📄 PDF Yükle</button>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+<div class="modal-overlay" id="modal" onclick="closeModalOut(event)">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Hesap Ekstresi Yükle</div>
@@ -269,616 +190,328 @@ main{max-width:900px;margin:0 auto;padding:1.25rem}
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-label" id="progressLabel">İşleniyor...</div>
     </div>
-    <div class="modal-info">
-      📌 PDF sadece tarayıcında işlenir, hiçbir sunucuya gönderilmez. Veriler Google Sheets'e kaydedilir.
-    </div>
+    <div class="modal-info">📌 PDF sadece tarayıcında işlenir, hiçbir sunucuya gönderilmez.</div>
   </div>
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-// ⚙️  AYARLAR — Sadece burası değiştirilir
-// ============================================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVxxJBXLA1YNZdpBt5Vp-NTJNN_Araefk_GFUSQ0eFxoym5ffpE9FyI1bSOGrv62HNKA/exec';
-// Örnek: 'https://script.google.com/macros/s/AKfycbXXX.../exec'
-// Boş bırakırsan sadece local çalışır (sync olmaz)
 // ============================================================
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ---- CATEGORIES ----
-const CATS = {
-  'Market':        { icon:'🛒', cls:'ci-market',  kw:['MIGROS','MIGROSONE','DIJITAL PLAT','MONEYPAY/MIGROS','MONEYPAY /MIGROS','MONEYPAY /DIJITAL','ANS GIDA','CANER MARKET'] },
-  'Yemek Sipariş': { icon:'🍔', cls:'ci-food',    kw:['YEMEKSEPETI','TRENDYOLYEMEK','TRENDYOL YEMEK','S/TRENDYOL YEMEK','PARAM/TRENDYOL','GETIR','/GETIR'] },
-  'Kafe & Restoran':{ icon:'☕', cls:'ci-cafe',    kw:['LOKANTA','PASTANE','COFFEE','CAFE','KAFE','KAHVE','SIMIT','TOSTCU','BUFE','GIRITLI','AKAT TICARET'] },
-  'Gelen Transfer': { icon:'💚', cls:'ci-tin',     kw:['GELEN FAST'] },
-  'Giden Transfer': { icon:'💸', cls:'ci-tout',    kw:['GİDEN FAST','GIDEN FAST'] },
-  'Abonelik':       { icon:'📱', cls:'ci-sub',     kw:['YOUTUBE','CLAUDE','WORKSPACE','SUBSCRIPTION','NETFLIX','SPOTIFY','APPLE','PAYCELL/FATURA','TURKCELL','VODAFONE'] },
-  'Ulaşım':         { icon:'🚌', cls:'ci-transit', kw:['KENTKART','OBILET','TURAS TURIZM','BATI ANTALYA TURIZ','CALHAN DINLENME'] },
-  'Altın & Döviz':  { icon:'🥇', cls:'ci-gold',   kw:['XAU','ALINAN DÖVİZ','ALINAN DOVIZ','KAMBIYO','SATILAN DÖV'] },
-  'Fatura':         { icon:'📄', cls:'ci-bill',    kw:['TURK.NET','AYDEM','KURUM FATURA','FATURA ODEME','AVEVA','AVEA COM'] },
-  'Scooter':        { icon:'🛴', cls:'ci-scooter', kw:['MARSSCOOTER','SCOOTER'] },
-  'ATM':            { icon:'🏧', cls:'ci-atm',     kw:['ATM PARA CEKME'] },
-  'İade':           { icon:'↩️', cls:'ci-iade',    kw:['İPTALİ','IADE İŞLEMİ','SATIŞ İADE'] },
-  'Ödül':           { icon:'🎁', cls:'ci-award',   kw:['KAMPANYASI ÖDÜLÜ','ÖDÜLÜ'] },
-  'Eğlence':        { icon:'🎮', cls:'ci-fun',     kw:['BOWLI','BOWLING','SINEMA','AVM ANTALYA'] },
-  'Akaryakıt':      { icon:'⛽', cls:'ci-fuel',    kw:['PETROL','AKARYAKIT','SHELL','OPET','TOTAL'] },
-  'Diğer':          { icon:'•',  cls:'ci-other',   kw:[] },
+const CATS={
+  'Market':         {icon:'🛒',cls:'ci-market', kw:['MIGROS','MIGROSONE','DIJITAL PLAT','MONEYPAY/MIGROS','MONEYPAY /MIGROS','MONEYPAY /DIJITAL','ANS GIDA','CANER MARKET']},
+  'Yemek Sipariş':  {icon:'🍔',cls:'ci-food',   kw:['YEMEKSEPETI','TRENDYOLYEMEK','TRENDYOL YEMEK','S/TRENDYOL YEMEK','PARAM/TRENDYOL','GETIR','/GETIR']},
+  'Kafe & Restoran':{icon:'☕',cls:'ci-cafe',   kw:['LOKANTA','PASTANE','COFFEE','CAFE','KAFE','KAHVE','SIMIT','TOSTCU','BUFE','GIRITLI','AKAT TICARET']},
+  'Gelen Transfer': {icon:'💚',cls:'ci-tin',    kw:['GELEN FAST']},
+  'Giden Transfer': {icon:'💸',cls:'ci-tout',   kw:['GİDEN FAST','GIDEN FAST']},
+  'Abonelik':       {icon:'📱',cls:'ci-sub',    kw:['YOUTUBE','CLAUDE','WORKSPACE','SUBSCRIPTION','NETFLIX','SPOTIFY','APPLE','PAYCELL/FATURA']},
+  'Ulaşım':         {icon:'🚌',cls:'ci-transit',kw:['KENTKART','OBILET','TURAS TURIZM','BATI ANTALYA TURIZ','CALHAN DINLENME']},
+  'Altın & Döviz':  {icon:'🥇',cls:'ci-gold',  kw:['XAU','ALINAN DÖVİZ','ALINAN DOVIZ','KAMBIYO','SATILAN DÖV']},
+  'Fatura':         {icon:'📄',cls:'ci-bill',   kw:['TURK.NET','AYDEM','KURUM FATURA','FATURA ODEME','AVEA COM']},
+  'Scooter':        {icon:'🛴',cls:'ci-scooter',kw:['MARSSCOOTER','SCOOTER']},
+  'ATM':            {icon:'🏧',cls:'ci-atm',    kw:['ATM PARA CEKME']},
+  'İade':           {icon:'↩️',cls:'ci-iade',   kw:['İPTALİ','IADE İŞLEMİ','SATIŞ İADE']},
+  'Ödül':           {icon:'🎁',cls:'ci-award',  kw:['KAMPANYASI ÖDÜLÜ','ÖDÜLÜ']},
+  'Eğlence':        {icon:'🎮',cls:'ci-fun',    kw:['BOWLI','BOWLING','SINEMA','AVM ANTALYA']},
+  'Akaryakıt':      {icon:'⛽',cls:'ci-fuel',   kw:['PETROL','AKARYAKIT','SHELL','OPET','TOTAL']},
+  'Diğer':          {icon:'•', cls:'ci-other',  kw:[]},
 };
 
-const CAT_COLORS = ['#e8a020','#00c896','#f04060','#4080ff','#9060f0','#00d4ff','#ff6040','#60d060','#c0a000','#ff60a0','#80c0ff','#40e0a0','#ff8040','#a040c0','#60ffb0','#d06020'];
+// These categories are EXCLUDED from normal income/expense stats
+const EXCL=['Gelen Transfer','Giden Transfer','Altın & Döviz'];
+const COLORS=['#e8a020','#00c896','#f04060','#4080ff','#9060f0','#00d4ff','#ff6040','#60d060','#c0a000','#ff60a0','#80c0ff','#40e0a0'];
 
-// ---- STATE ----
-let allTx = JSON.parse(localStorage.getItem('paratakip_tx') || '[]');
-let activePeriod = 'all';
-let activeFilter = 'all';
-let visibleCount = 40;
-let catChart, dayChart;
+let allTx=JSON.parse(localStorage.getItem('paratakip_tx')||'[]');
+let period='all',filter='all',view='normal',visible=40;
+let catChart,dayChart;
 
-// ---- CATEGORIZE ----
-function categorize(desc) {
-  const d = desc.toUpperCase();
-  for (const [cat, data] of Object.entries(CATS)) {
-    if (cat === 'Diğer') continue;
-    if (data.kw.some(k => d.includes(k))) return cat;
+function cat(desc){
+  const d=desc.toUpperCase();
+  for(const[c,data]of Object.entries(CATS)){
+    if(c==='Diğer')continue;
+    if(data.kw.some(k=>d.includes(k)))return c;
   }
   return 'Diğer';
 }
 
-// ---- PERIODS ----
-function getPeriods() {
-  const map = {};
-  for (const t of allTx) {
-    const [d,m,y] = t.date.split('.');
-    const key = `${y}-${m}`;
-    const label = new Date(+y,+m-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
-    if (!map[key]) map[key] = label;
-  }
-  return Object.entries(map).sort((a,b) => b[0].localeCompare(a[0]));
+function fmt(n){return Math.abs(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';}
+
+function byPeriod(){
+  if(period==='all')return allTx;
+  return allTx.filter(t=>{const[d,m,y]=t.date.split('.');return`${y}-${m}`===period;});
 }
 
-function filteredByPeriod() {
-  if (activePeriod === 'all') return allTx;
-  return allTx.filter(t => {
-    const [d,m,y] = t.date.split('.');
-    return `${y}-${m}` === activePeriod;
-  });
+// ---- PERIOD BAR ----
+function renderPeriodBar(){
+  const map={};
+  for(const t of allTx){const[d,m,y]=t.date.split('.');const k=`${y}-${m}`;if(!map[k])map[k]=new Date(+y,+m-1,1).toLocaleDateString('tr-TR',{month:'long',year:'numeric'});}
+  const periods=Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0]));
+  let h=`<button class="period-btn ${period==='all'&&view==='normal'?'active':''}" onclick="setPeriod('all')">Tümü</button>`;
+  for(const[k,l]of periods)h+=`<button class="period-btn ${period===k&&view==='normal'?'active':''}" onclick="setPeriod('${k}')">${l}</button>`;
+  h+=`<button class="period-btn invest-btn ${view==='invest'?'active':''}" onclick="setView('invest')">🥇 Yatırım</button>`;
+  document.getElementById('periodBar').innerHTML=h;
 }
 
-// ---- RENDER PERIOD BAR ----
-function renderPeriodBar() {
-  const bar = document.getElementById('periodBar');
-  const periods = getPeriods();
-  let html = `<button class="period-btn ${activePeriod==='all'?'active':''}" onclick="setPeriod('all')">Tümü</button>`;
-  for (const [key, label] of periods) {
-    html += `<button class="period-btn ${activePeriod===key?'active':''}" onclick="setPeriod('${key}')">${label}</button>`;
-  }
-  bar.innerHTML = html;
-}
+function setPeriod(p){period=p;filter='all';visible=40;view='normal';renderPeriodBar();renderCards();showNormal();}
+function setView(v){view=v;visible=40;renderPeriodBar();renderCards();if(v==='invest'){document.getElementById('normalView').style.display='none';document.getElementById('investView').classList.add('show');renderInvest();}else showNormal();}
 
-function setPeriod(p) {
-  activePeriod = p;
-  activeFilter = 'all';
-  visibleCount = 40;
-  renderPeriodBar();
-  renderCards();
-  renderCharts();
-  renderGold();
-  renderTransactions();
-}
+// ---- CARDS ----
+function renderCards(){
+  const tx=byPeriod();
+  const last=tx.length?tx[tx.length-1].balance:0;
 
-// ---- FMT ----
-function fmt(n) {
-  return Math.abs(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺';
-}
-function fmtSign(n) {
-  return (n >= 0 ? '+' : '-') + fmt(n);
-}
-
-// ---- RENDER CARDS ----
-function renderCards() {
-  const tx = filteredByPeriod();
-  const TRANSFER = ['Gelen Transfer','Giden Transfer'];
-  const GOLD = ['Altın & Döviz'];
-  const EXCL = [...TRANSFER, ...GOLD];
-
-  // Real spending (no transfers, no gold)
-  const spendTx = tx.filter(t => t.amount < 0 && !EXCL.includes(t.category));
-  const spendTotal = spendTx.reduce((s,t) => s + Math.abs(t.amount), 0);
-
-  // Real income (no transfers, no gold)
-  const incTx = tx.filter(t => t.amount > 0 && !EXCL.includes(t.category));
-  const incTotal = incTx.reduce((s,t) => s + t.amount, 0);
-
-  // Gold P&L
-  const goldTx = tx.filter(t => GOLD.includes(t.category));
-  const goldPL = goldTx.reduce((s,t) => s + t.amount, 0);
-
-  // Ending balance
-  const balance = tx.length ? tx[tx.length-1].balance : 0;
-
-  document.getElementById('summaryCards').innerHTML = `
-    <div class="card c-gold">
-      <div class="card-label">Güncel Bakiye</div>
-      <div class="card-value neutral mono">${fmt(balance)}</div>
-      <div class="card-sub">Dönem sonu • ${tx.length} işlem</div>
-    </div>
-    <div class="card c-red">
-      <div class="card-label">Harcama</div>
-      <div class="card-value negative mono">${fmt(spendTotal)}</div>
-      <div class="card-sub">${spendTx.length} işlem (transfer/altın hariç)</div>
-    </div>
-    <div class="card c-green">
-      <div class="card-label">Gelir</div>
-      <div class="card-value positive mono">${fmt(incTotal)}</div>
-      <div class="card-sub">${incTx.length} işlem (transfer/altın hariç)</div>
-    </div>
-    <div class="card ${goldPL>=0?'c-green':'c-red'}">
-      <div class="card-label">Altın K/Z</div>
-      <div class="card-value ${goldPL>=0?'positive':'negative'} mono">${goldPL>=0?'+':''}${fmt(goldPL)}</div>
-      <div class="card-sub">${goldTx.length} altın işlemi</div>
-    </div>`;
-}
-
-// ---- RENDER CHARTS ----
-function renderCharts() {
-  const tx = filteredByPeriod();
-  renderCatChart(tx);
-  renderDayChart(tx);
-}
-
-function renderCatChart(tx) {
-  const EXCL = ['Gelen Transfer','Giden Transfer','Altın & Döviz'];
-  const expenses = tx.filter(t=>t.amount<0 && !EXCL.includes(t.category));
-  const map = {};
-  for (const t of expenses) {
-    map[t.category] = (map[t.category]||0) + Math.abs(t.amount);
-  }
-  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const labels = sorted.map(e=>e[0]);
-  const data = sorted.map(e=>e[1]);
-  const colors = CAT_COLORS.slice(0,labels.length);
-
-  const legend = document.getElementById('catLegend');
-  legend.innerHTML = sorted.map((e,i)=>
-    `<div class="cat-legend-row">
-      <div class="cat-dot" style="background:${colors[i]}"></div>
-      <div class="cat-name">${e[0]}</div>
-      <div class="cat-amt">${fmt(e[1])}</div>
-    </div>`
-  ).join('');
-
-  if (catChart) catChart.destroy();
-  if (!data.length) return;
-
-  catChart = new Chart(document.getElementById('catChart'), {
-    type: 'doughnut',
-    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:4 }] },
-    options: {
-      responsive:true, maintainAspectRatio:false, cutout:'68%',
-      plugins:{ legend:{display:false}, tooltip:{
-        callbacks:{label:ctx=>' '+ctx.label+': '+fmt(ctx.raw)}
-      }},
-    }
-  });
-}
-
-function renderDayChart(tx) {
-  const map = {};
-  for (const t of tx) {
-    if (t.amount < 0) {
-      const key = t.date.substring(0,5);
-      map[key] = (map[key]||0) + Math.abs(t.amount);
-    }
-  }
-  const sorted = Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0]));
-  const labels = sorted.map(e=>e[0]);
-  const data = sorted.map(e=>e[1]);
-
-  if (dayChart) dayChart.destroy();
-  if (!data.length) return;
-
-  dayChart = new Chart(document.getElementById('dayChart'), {
-    type: 'bar',
-    data: { labels, datasets:[{ data, backgroundColor:'rgba(232,160,32,.6)', borderColor:'rgba(232,160,32,.9)', borderWidth:1, borderRadius:3 }] },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}} },
-      scales:{
-        x:{ grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#5a6680',font:{size:10}} },
-        y:{ grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v} }
-      }
-    }
-  });
-}
-
-// ---- FILTER BUTTONS ----
-function renderFilterRow() {
-  const tx = filteredByPeriod();
-  const cats = [...new Set(tx.map(t=>t.category))].sort();
-  let html = `<button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">Tümü</button>
-    <button class="filter-btn ${activeFilter==='gelir'?'active':''}" onclick="setFilter('gelir')">💚 Gelir</button>
-    <button class="filter-btn ${activeFilter==='gider'?'active':''}" onclick="setFilter('gider')">💸 Gider</button>`;
-  for (const c of cats) {
-    const ico = CATS[c]?.icon || '•';
-    html += `<button class="filter-btn ${activeFilter===c?'active':''}" onclick="setFilter('${c}')">${ico} ${c}</button>`;
-  }
-  document.getElementById('filterRow').innerHTML = html;
-}
-
-function setFilter(f) {
-  activeFilter = f;
-  visibleCount = 40;
-  renderFilterRow();
-  renderTransactions();
-}
-
-// ---- RENDER TRANSACTIONS ----
-function renderTransactions() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  let tx = filteredByPeriod();
-
-  if (activeFilter === 'gelir') tx = tx.filter(t=>t.amount>0);
-  else if (activeFilter === 'gider') tx = tx.filter(t=>t.amount<0);
-  else if (activeFilter !== 'all') tx = tx.filter(t=>t.category===activeFilter);
-
-  if (search) tx = tx.filter(t=>t.description.toLowerCase().includes(search)||t.category.toLowerCase().includes(search));
-
-  const reversed = [...tx].reverse();
-  const shown = reversed.slice(0, visibleCount);
-
-  if (!shown.length) {
-    document.getElementById('txList').innerHTML = allTx.length
-      ? '<div class="no-results">Sonuç bulunamadı</div>'
-      : `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Henüz işlem yok</div><div class="empty-sub">PDF'ini yükleyerek başla</div></div>`;
-    renderFilterRow();
+  if(view==='invest'){
+    const g=tx.filter(t=>t.category==='Altın & Döviz');
+    const alim=g.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+    const sat=g.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+    const pl=sat-alim;
+    document.getElementById('summaryCards').innerHTML=`
+      <div class="card c-gold"><div class="card-label">Güncel Bakiye</div><div class="card-value neutral">${fmt(last)}</div><div class="card-sub">Dönem sonu</div></div>
+      <div class="card c-red"><div class="card-label">Toplam Alım</div><div class="card-value negative">${fmt(alim)}</div><div class="card-sub">${g.filter(t=>t.amount<0).length} işlem</div></div>
+      <div class="card c-green"><div class="card-label">Toplam Satım</div><div class="card-value positive">${fmt(sat)}</div><div class="card-sub">${g.filter(t=>t.amount>0).length} işlem</div></div>
+      <div class="card ${pl>=0?'c-green':'c-red'}"><div class="card-label">Kar / Zarar</div><div class="card-value ${pl>=0?'positive':'negative'}">${pl>=0?'+':''}${fmt(pl)}</div><div class="card-sub">Net yatırım sonucu</div></div>`;
     return;
   }
 
-  const rows = shown.map(t => {
-    const catData = CATS[t.category] || CATS['Diğer'];
-    const isPos = t.amount >= 0;
-    return `
-      <div class="tx-item" onclick="toggleDetail(this)">
-        <div class="tx-icon ${catData.cls}">${catData.icon}</div>
-        <div class="tx-info">
-          <div class="tx-desc">${escHtml(cleanDesc(t.description))}</div>
-          <div class="tx-meta">
-            <span class="tx-date">${t.date}</span>
-            <span class="tx-cat-badge">${t.category}</span>
-          </div>
-        </div>
-        <div>
-          <div class="tx-amount ${isPos?'pos':'neg'}">${isPos?'+':''} ${fmt(t.amount)}</div>
-          <div class="tx-bal">${fmt(t.balance)}</div>
-        </div>
-      </div>
-      <div class="tx-detail">${escHtml(t.description)}</div>`;
+  const sp=tx.filter(t=>t.amount<0&&!EXCL.includes(t.category));
+  const inc=tx.filter(t=>t.amount>0&&!EXCL.includes(t.category));
+  const spT=sp.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const incT=inc.reduce((s,t)=>s+t.amount,0);
+  const net=incT-spT;
+  document.getElementById('summaryCards').innerHTML=`
+    <div class="card c-gold"><div class="card-label">Güncel Bakiye</div><div class="card-value neutral">${fmt(last)}</div><div class="card-sub">Dönem sonu · ${tx.length} işlem</div></div>
+    <div class="card c-red"><div class="card-label">Harcama</div><div class="card-value negative">${fmt(spT)}</div><div class="card-sub">${sp.length} işlem · transfer/yatırım hariç</div></div>
+    <div class="card c-green"><div class="card-label">Gelir</div><div class="card-value positive">${fmt(incT)}</div><div class="card-sub">${inc.length} işlem · transfer/yatırım hariç</div></div>
+    <div class="card ${net>=0?'c-blue':'c-red'}"><div class="card-label">Net</div><div class="card-value ${net>=0?'positive':'negative'}">${net>=0?'+':''}${fmt(net)}</div><div class="card-sub">Gerçek gelir − harcama</div></div>`;
+}
+
+// ---- NORMAL VIEW ----
+function showNormal(){
+  document.getElementById('normalView').style.display='block';
+  document.getElementById('investView').classList.remove('show');
+  renderCharts();renderTx();
+}
+
+function renderCharts(){
+  const tx=byPeriod();
+  // Cat chart — exclude transfers & gold
+  const expenses=tx.filter(t=>t.amount<0&&!EXCL.includes(t.category));
+  const cmap={};for(const t of expenses)cmap[t.category]=(cmap[t.category]||0)+Math.abs(t.amount);
+  const sorted=Object.entries(cmap).sort((a,b)=>b[1]-a[1]).slice(0,9);
+  const cols=COLORS.slice(0,sorted.length);
+  document.getElementById('catLegend').innerHTML=sorted.map((e,i)=>`<div class="cat-legend-row"><div class="cat-dot" style="background:${cols[i]}"></div><div class="cat-name">${e[0]}</div><div class="cat-amt">${fmt(e[1])}</div></div>`).join('');
+  if(catChart)catChart.destroy();
+  if(sorted.length)catChart=new Chart(document.getElementById('catChart'),{type:'doughnut',data:{labels:sorted.map(e=>e[0]),datasets:[{data:sorted.map(e=>e[1]),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmt(ctx.raw)}}}}});
+  // Day chart — exclude transfers & gold
+  const dmap={};
+  for(const t of tx){if(t.amount<0&&!EXCL.includes(t.category)){const k=t.date.substring(0,5);dmap[k]=(dmap[k]||0)+Math.abs(t.amount);}}
+  const ds=Object.entries(dmap).sort((a,b)=>a[0].localeCompare(b[0]));
+  if(dayChart)dayChart.destroy();
+  if(ds.length)dayChart=new Chart(document.getElementById('dayChart'),{type:'bar',data:{labels:ds.map(e=>e[0]),datasets:[{data:ds.map(e=>e[1]),backgroundColor:'rgba(232,160,32,.6)',borderColor:'rgba(232,160,32,.9)',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#5a6680',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+}
+
+// ---- INVEST VIEW ----
+function renderInvest(){
+  const tx=byPeriod();
+  const g=tx.filter(t=>t.category==='Altın & Döviz');
+  if(!g.length){document.getElementById('investList').innerHTML='<div class="no-results">Bu dönemde altın/döviz işlemi yok</div>';return;}
+  document.getElementById('investList').innerHTML=[...g].reverse().map(t=>{
+    const isBuy=t.amount<0;
+    const isFee=t.description.toUpperCase().includes('KAMBIYO')||t.description.toUpperCase().includes('TAHSİLAT');
+    const cls=isFee?'ifee':isBuy?'ibuy':'isell';
+    const icon=isFee?'💳':isBuy?'🛒':'💰';
+    const label=isFee?'Komisyon':isBuy?'Alım':'Satım';
+    const desc=t.description.length>60?t.description.substring(0,60)+'…':t.description;
+    return`<div class="invest-row"><div class="invest-icon ${cls}">${icon}</div><div class="invest-info"><div class="invest-desc">${esc(desc)}</div><div class="invest-date">${t.date} · ${label}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;color:${t.amount<0?'var(--red)':'var(--green)'}">${t.amount<0?'−':'+'}${fmt(t.amount)}</div><div style="font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace">${fmt(t.balance)}</div></div></div>`;
   }).join('');
-
-  let extra = '';
-  if (reversed.length > visibleCount) {
-    extra = `<button class="load-more-btn" onclick="loadMore()">+ ${reversed.length - visibleCount} işlem daha göster</button>`;
-  }
-
-  document.getElementById('txList').innerHTML = rows + extra;
-  renderFilterRow();
 }
 
-function loadMore() { visibleCount += 40; renderTransactions(); }
-
-function toggleDetail(el) {
-  el.classList.toggle('expanded');
+// ---- FILTER ROW ----
+function renderFilters(){
+  const tx=byPeriod();
+  const cats=[...new Set(tx.filter(t=>!EXCL.includes(t.category)).map(t=>t.category))].sort();
+  let h=`<button class="filter-btn ${filter==='all'?'active':''}" onclick="setFilter('all')">Tümü</button><button class="filter-btn ${filter==='gelir'?'active':''}" onclick="setFilter('gelir')">💚 Gelir</button><button class="filter-btn ${filter==='gider'?'active':''}" onclick="setFilter('gider')">💸 Gider</button><button class="filter-btn ${filter==='transfer'?'active':''}" onclick="setFilter('transfer')">↕ Transfer</button>`;
+  for(const c of cats){const ico=CATS[c]?.icon||'•';h+=`<button class="filter-btn ${filter===c?'active':''}" onclick="setFilter('${c}')">${ico} ${c}</button>`;}
+  document.getElementById('filterRow').innerHTML=h;
 }
+function setFilter(f){filter=f;visible=40;renderFilters();renderTx();}
 
-function cleanDesc(d) {
-  return d
-    .replace(/YURT (ICI|DISI) POS SATIS KART NO:[\d\*]+ POS İŞYERİ ADI:/i,'')
-    .replace(/İŞLEM TARİHİ:[\d ]+PROVİZYON NO:[\d ]+RRN:[\d ]+/gi,'')
-    .replace(/GELEN FAST\. - GONDEREN :/i,'← ')
-    .replace(/GİDEN FAST\. ALICI:/i,'→ ')
-    .replace(/- BANKAADI:[^\-]+-/g,'')
-    .replace(/FAST SORGU NO:[\d]+- ALICI IBAN:[\w]+/g,'')
-    .replace(/KAYNAK :MOBIL - AÇIKLAMA :/g,'')
-    .replace(/\s+/g,' ').trim();
+// ---- TRANSACTIONS ----
+function renderTx(){
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  let tx=byPeriod();
+  if(filter==='gelir')tx=tx.filter(t=>t.amount>0&&!['Gelen Transfer','Altın & Döviz'].includes(t.category));
+  else if(filter==='gider')tx=tx.filter(t=>t.amount<0&&!['Giden Transfer','Altın & Döviz'].includes(t.category));
+  else if(filter==='transfer')tx=tx.filter(t=>['Gelen Transfer','Giden Transfer'].includes(t.category));
+  else if(filter!=='all')tx=tx.filter(t=>t.category===filter);
+  if(search)tx=tx.filter(t=>t.description.toLowerCase().includes(search)||t.category.toLowerCase().includes(search));
+  const rev=[...tx].reverse();const shown=rev.slice(0,visible);
+  if(!shown.length){document.getElementById('txList').innerHTML=allTx.length?'<div class="no-results">Sonuç bulunamadı</div>':`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Henüz işlem yok</div><div class="empty-sub">PDF'ini yükleyerek başla</div></div>`;renderFilters();return;}
+  const rows=shown.map(t=>{
+    const cd=CATS[t.category]||CATS['Diğer'];const pos=t.amount>=0;
+    return`<div class="tx-item" onclick="toggleD(this)"><div class="tx-icon ${cd.cls}">${cd.icon}</div><div class="tx-info"><div class="tx-desc">${esc(clean(t.description))}</div><div class="tx-meta"><span class="tx-date">${t.date}</span><span class="tx-cat-badge">${t.category}</span></div></div><div><div class="tx-amount ${pos?'pos':'neg'}">${pos?'+':''}${fmt(t.amount)}</div><div class="tx-bal">${fmt(t.balance)}</div></div></div><div class="tx-detail">${esc(t.description)}</div>`;
+  }).join('');
+  const extra=rev.length>visible?`<button class="load-more-btn" onclick="loadMore()">+ ${rev.length-visible} işlem daha</button>`:'';
+  document.getElementById('txList').innerHTML=rows+extra;
+  renderFilters();
 }
+function loadMore(){visible+=40;renderTx();}
+function toggleD(el){el.classList.toggle('expanded');}
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function clean(d){
+  return d.replace(/YURT (ICI|DISI) POS SATIS KART NO:[\d\*]+ POS İŞYERİ ADI:/i,'')
+    .replace(/İŞLEM TARİHİ:[\d ]+ PROVİZYON NO:[\d ]+ RRN:[\d ]+/gi,'')
+    .replace(/GELEN FAST\. - GONDEREN :/i,'← ').replace(/GİDEN FAST\. ALICI:/i,'→ ')
+    .replace(/- BANKAADI:[^\-]+-/g,'').replace(/FAST SORGU NO:[\d]+- ALICI IBAN:[\w]+/g,'')
+    .replace(/KAYNAK :MOBIL - AÇIKLAMA :/g,'').replace(/\s+/g,' ').trim();
 }
-
-// ---- GOLD SECTION ----
-function renderGold() {
-  const tx = filteredByPeriod();
-  const goldTx = tx.filter(t => t.category === 'Altın & Döviz');
-  const sec = document.getElementById('goldSection');
-  if (!goldTx.length) { sec.style.display='none'; return; }
-  sec.style.display = 'block';
-
-  const alim  = goldTx.filter(t => t.amount < 0);
-  const satim = goldTx.filter(t => t.amount > 0);
-  const alimT = alim.reduce((s,t) => s+Math.abs(t.amount),0);
-  const satimT = satim.reduce((s,t) => s+t.amount,0);
-  const pl = satimT - alimT;
-
-  document.getElementById('goldList').innerHTML = goldTx.map(t => `
-    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--s2);border-radius:var(--r)">
-      <div style="font-size:1.1rem">${t.amount<0?'🛒':'💰'}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description.substring(0,60)}</div>
-        <div style="font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace">${t.date} &nbsp;${t.amount<0?'Alım':'Satım'}</div>
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:.9rem;font-weight:500;color:${t.amount<0?'var(--red)':'var(--green)'}">${t.amount<0?'-':'+'} ${fmt(t.amount)}</div>
-    </div>`).join('');
-
-  document.getElementById('goldSummary').innerHTML = `
-    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Toplam Alım</div><div style="font-family:'DM Mono',monospace;color:var(--red)">${fmt(alimT)}</div></div>
-    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Toplam Satım</div><div style="font-family:'DM Mono',monospace;color:var(--green)">${fmt(satimT)}</div></div>
-    <div><div style="font-size:.7rem;color:var(--muted2);font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Kar / Zarar</div><div style="font-family:'DM Mono',monospace;color:${pl>=0?'var(--green)':'var(--red)'};font-weight:700">${pl>=0?'+':''}${fmt(pl)}</div></div>`;
-}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ---- FULL RENDER ----
-function fullRender() {
-  renderPeriodBar();
-  renderCards();
-  renderCharts();
-  renderGold();
-  renderTransactions();
+function render(){
+  renderPeriodBar();renderCards();
+  if(view==='invest')renderInvest();
+  else showNormal();
 }
 
 // ---- PDF PARSING ----
-async function extractTextFromPDF(file) {
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  const allItems = [];
-  for (let pn = 1; pn <= pdf.numPages; pn++) {
-    const page = await pdf.getPage(pn);
-    const content = await page.getTextContent();
-    for (const item of content.items) {
-      if ('str' in item && item.str && item.str.trim()) {
-        allItems.push({ page: pn, y: item.transform[5], x: item.transform[4], str: item.str.trim() });
+async function extractText(file){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const items=[];
+  for(let pn=1;pn<=pdf.numPages;pn++){
+    const page=await pdf.getPage(pn);
+    const content=await page.getTextContent();
+    for(const item of content.items){
+      if('str' in item&&item.str&&item.str.trim()){
+        items.push({page:pn,y:item.transform[5],x:item.transform[4],str:item.str.trim()});
       }
     }
   }
-  // Sort by page → Y descending (top of page first) → X ascending (left to right)
-  allItems.sort((a, b) => {
-    if (a.page !== b.page) return a.page - b.page;
-    if (Math.abs(b.y - a.y) > 2) return b.y - a.y;
-    return a.x - b.x;
+  // Sort: page → Y descending (top of page first) → X ascending (left to right)
+  items.sort((a,b)=>{
+    if(a.page!==b.page)return a.page-b.page;
+    if(Math.abs(b.y-a.y)>2)return b.y-a.y;
+    return a.x-b.x;
   });
-  return allItems.map(i => i.str).join(' ');
+  return items.map(i=>i.str).join(' ');
 }
 
-function parseTransactions(fullText) {
-  // Match: DD.MM.YYYY <spaces> DD.MM.YYYY <spaces>
-  // The period header "11.04.2026 - 11.05.2026" won't match (has " - " between dates)
-  const datePairRx = /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})\s+/g;
-  const positions = [];
-  let m;
-  while ((m = datePairRx.exec(fullText)) !== null) {
-    // Skip if preceded by a dash (part of date range like "11.04.2026 - 11.05.2026")
-    const before = fullText.substring(Math.max(0, m.index - 3), m.index);
-    if (before.trim().endsWith('-')) continue;
-    positions.push({ index: m.index, contentStart: m.index + m[0].length, date: m[1], valor: m[2] });
+function parseTx(fullText){
+  // Match date pairs: DD.MM.YYYY <spaces> DD.MM.YYYY <spaces>
+  // Period header "11.04.2026 - 11.05.2026" won't match (has " - " between)
+  const dpRx=/(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})\s+/g;
+  const pos=[];let m;
+  while((m=dpRx.exec(fullText))!==null){
+    const before=fullText.substring(Math.max(0,m.index-3),m.index).trim();
+    if(before.endsWith('-'))continue;
+    pos.push({index:m.index,cs:m.index+m[0].length,date:m[1],valor:m[2]});
   }
-
-  const txs = [];
-  for (let i = 0; i < positions.length; i++) {
-    const start = positions[i].contentStart;
-    const end = i + 1 < positions.length ? positions[i + 1].index : fullText.length;
-    const chunk = fullText.substring(start, end);
-
-    const numRx = /-?[\d,]+\.\d{2}(?![\d.])/g;
-    const nums = [...chunk.matchAll(numRx)];
-    if (nums.length < 2) continue;
-
-    const amount  = parseFloat(nums[nums.length - 2][0].replace(/,/g, ''));
-    const balance = parseFloat(nums[nums.length - 1][0].replace(/,/g, ''));
-    const amtPos  = nums[nums.length - 2].index;
-    const desc    = chunk.substring(0, amtPos).replace(/\s+/g, ' ').trim();
-
-    if (!desc || desc.length < 3) continue;
-
-    // Skip spurious entries from page headers
-    const headerWords = ['fibabanka','444 88 88','hesap ekstresi','müşteri numarası','adı soyadı'];
-    if (headerWords.some(w => desc.toLowerCase().includes(w))) continue;
-
+  const txs=[];
+  for(let i=0;i<pos.length;i++){
+    const chunk=fullText.substring(pos[i].cs,i+1<pos.length?pos[i+1].index:fullText.length);
+    // Key fix: (?![\d.]) prevents "11.05" in "11.05.2026" from matching as amount
+    const nums=[...chunk.matchAll(/-?[\d,]+\.\d{2}(?![\d.])/g)];
+    if(nums.length<2)continue;
+    const amount=parseFloat(nums[nums.length-2][0].replace(/,/g,''));
+    const balance=parseFloat(nums[nums.length-1][0].replace(/,/g,''));
+    const desc=chunk.substring(0,nums[nums.length-2].index).replace(/\s+/g,' ').trim();
+    if(!desc||desc.length<3)continue;
+    // Skip page header content
+    if(['fibabanka','444 88 88','hesap ekstresi','müşteri numarası'].some(w=>desc.toLowerCase().includes(w)))continue;
+    // Sanity check
+    if(Math.abs(amount)>999999)continue;
     txs.push({
-      id: `${positions[i].date}_${amount}_${Math.random().toString(36).substr(2,4)}`,
-      date: positions[i].date,
-      valor: positions[i].valor,
-      description: desc,
-      amount,
-      balance,
-      category: categorize(desc),
-      type: amount >= 0 ? 'gelir' : 'gider'
+      id:`${pos[i].date}_${amount}_${Math.random().toString(36).substr(2,4)}`,
+      date:pos[i].date,valor:pos[i].valor,description:desc,amount,balance,
+      category:cat(desc),type:amount>=0?'gelir':'gider'
     });
   }
   return txs;
-}// ---- FILE HANDLING ----
-async function handleFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  await processPDF(file);
 }
 
-async function processPDF(file) {
-  const pw = document.getElementById('progressWrap');
-  const pf = document.getElementById('progressFill');
-  const pl = document.getElementById('progressLabel');
-  pw.style.display = 'block';
-  pf.style.width = '10%';
-  pl.textContent = 'PDF okunuyor...';
+// ---- FILE HANDLING ----
+async function handleFile(e){const f=e.target.files[0];if(f)await processPDF(f);}
 
-  try {
-    pf.style.width = '30%';
-    const text = await extractTextFromPDF(file);
-    pf.style.width = '60%';
-    pl.textContent = 'İşlemler ayrıştırılıyor...';
-    const newTxs = parseTransactions(text);
-    pf.style.width = '80%';
-
-    if (!newTxs.length) {
-      const sample = text.substring(0, 400).replace(/\s+/g,' ');
-      pl.textContent = '❌ İşlem bulunamadı. Konsola bak (F12).';
-      console.error('PDF PARSE FAILED. Text sample:', sample);
-      console.error('Date pairs found: check manually');
-      toast('⚠️ İşlem bulunamadı — F12 > Konsol > hata mesajını kopyala');
+async function processPDF(file){
+  const pw=document.getElementById('progressWrap');
+  const pf=document.getElementById('progressFill');
+  const pl=document.getElementById('progressLabel');
+  pw.style.display='block';pf.style.width='10%';pl.textContent='PDF okunuyor...';
+  try{
+    pf.style.width='35%';
+    const text=await extractText(file);
+    pf.style.width='65%';pl.textContent='Ayrıştırılıyor...';
+    const newTxs=parseTx(text);
+    pf.style.width='80%';
+    if(!newTxs.length){
+      pl.textContent='❌ İşlem bulunamadı';
+      console.error('Parse failed. Sample:',text.substring(0,500));
+      toast('⚠️ İşlem bulunamadı — F12 > Konsol');
       return;
     }
-
-    const existingIds = new Set(allTx.map(t => `${t.date}_${t.amount}_${t.description.substring(0,20)}`));
-    const fresh = newTxs.filter(t => {
-      const key = `${t.date}_${t.amount}_${t.description.substring(0,20)}`;
-      return !existingIds.has(key);
-    });
-
-    allTx = [...allTx, ...fresh].sort((a,b) => {
-      const da = a.date.split('.').reverse().join('');
-      const db = b.date.split('.').reverse().join('');
-      return da.localeCompare(db) || a.amount - b.amount;
-    });
-
-    saveLocal();
-    pf.style.width = '90%';
-    pl.textContent = 'Kaydediliyor...';
-
+    const keys=new Set(allTx.map(t=>`${t.date}_${t.amount}_${t.description.substring(0,15)}`));
+    const fresh=newTxs.filter(t=>!keys.has(`${t.date}_${t.amount}_${t.description.substring(0,15)}`));
+    allTx=[...allTx,...fresh].sort((a,b)=>a.date.split('.').reverse().join('').localeCompare(b.date.split('.').reverse().join(''))||a.amount-b.amount);
+    saveLocal();pf.style.width='90%';pl.textContent='Kaydediliyor...';
     await syncToSheets();
-
-    pf.style.width = '100%';
-    pl.textContent = `✅ ${fresh.length} yeni işlem eklendi (${newTxs.length} toplam)`;
-
-    setTimeout(() => {
-      closeModal();
-      pw.style.display = 'none';
-      pf.style.width = '0%';
-      document.getElementById('fileInput').value = '';
-    }, 1500);
-
-    fullRender();
-    toast(`✅ ${fresh.length} yeni işlem eklendi`);
-
-  } catch(e) {
-    console.error(e);
-    pl.textContent = '❌ Hata: ' + e.message;
-    toast('❌ PDF işlenirken hata oluştu');
-  }
+    pf.style.width='100%';pl.textContent=`✅ ${fresh.length} yeni işlem eklendi`;
+    setTimeout(()=>{closeModal();pw.style.display='none';pf.style.width='0%';document.getElementById('fileInput').value='';},1500);
+    render();toast(`✅ ${fresh.length} yeni işlem eklendi`);
+  }catch(err){pl.textContent='❌ '+err.message;toast('❌ Hata');console.error(err);}
 }
 
-// ---- LOCAL STORAGE ----
-function saveLocal() {
-  localStorage.setItem('paratakip_tx', JSON.stringify(allTx));
-}
+function saveLocal(){localStorage.setItem('paratakip_tx',JSON.stringify(allTx));}
 
-// ---- SYNC ----
-async function syncData() {
+async function syncData(){
   setSync('syncing');
-  try {
-    if (APPS_SCRIPT_URL) {
-      const res = await fetch(APPS_SCRIPT_URL + '?action=read');
-      const remote = await res.json();
-      if (Array.isArray(remote) && remote.length) {
-        const existingIds = new Set(allTx.map(t=>t.id));
-        const newOnes = remote.filter(t=>!existingIds.has(t.id));
-        if (newOnes.length) {
-          allTx = [...allTx, ...newOnes].sort((a,b)=>{
-            const da=a.date.split('.').reverse().join('');
-            const db=b.date.split('.').reverse().join('');
-            return da.localeCompare(db);
-          });
-          saveLocal();
-          fullRender();
-          toast(`🔄 ${newOnes.length} yeni işlem senkronize edildi`);
-        } else {
-          toast('✅ Veri güncel');
-        }
+  try{
+    if(APPS_SCRIPT_URL){
+      const res=await fetch(APPS_SCRIPT_URL+'?action=read');
+      const remote=await res.json();
+      if(Array.isArray(remote)&&remote.length){
+        const ids=new Set(allTx.map(t=>t.id));
+        const fresh=remote.filter(t=>!ids.has(t.id));
+        if(fresh.length){allTx=[...allTx,...fresh].sort((a,b)=>a.date.split('.').reverse().join('').localeCompare(b.date.split('.').reverse().join('')));saveLocal();render();toast(`🔄 ${fresh.length} yeni`);}
+        else toast('✅ Güncel');
       }
-    } else {
-      toast('⚠️ Apps Script URL tanımlanmamış');
-    }
+    }else toast('⚠️ URL yok');
     setSync('ok');
-  } catch(e) {
-    setSync('error');
-    toast('❌ Senkronizasyon hatası');
-  }
+  }catch(e){setSync('error');toast('❌ Senkronizasyon hatası');}
 }
 
-async function syncToSheets() {
-  if (!APPS_SCRIPT_URL) return;
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({ action: 'bulk_add', transactions: allTx })
-    });
-    setSync('ok');
-  } catch(e) {
-    setSync('error');
-  }
+async function syncToSheets(){
+  if(!APPS_SCRIPT_URL)return;
+  try{await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'bulk_add',transactions:allTx})});setSync('ok');}
+  catch(e){setSync('error');}
 }
 
-function setSync(state) {
-  const dot = document.getElementById('syncDot');
-  dot.className = 'sync-dot ' + state;
+function setSync(s){document.getElementById('syncDot').className='sync-dot '+s;}
+
+function exportJSON(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(allTx,null,2)],{type:'application/json'}));
+  a.download=`paratakip_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('📥 JSON indirildi');
 }
 
-// ---- EXPORT ----
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(allTx,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `paratakip_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  toast('📥 JSON dosyası indirildi');
-}
+function openModal(){document.getElementById('modal').classList.add('open');setTimeout(()=>document.getElementById('fileInput').click(),300);}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('progressWrap').style.display='none';document.getElementById('progressFill').style.width='0%';document.getElementById('fileInput').value='';}
+function closeModalOut(e){if(e.target===document.getElementById('modal'))closeModal();}
 
-// ---- MODAL ----
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  setTimeout(() => document.getElementById('fileInput').click(), 300);
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.getElementById('progressWrap').style.display = 'none';
-  document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('fileInput').value = '';
-}
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modal')) closeModal();
-}
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')processPDF(f);});
 
-// Drag & drop
-const dz = document.getElementById('dropZone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-dz.addEventListener('drop', e => {
-  e.preventDefault();
-  dz.classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type === 'application/pdf') processPDF(file);
-});
-
-// ---- TOAST ----
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
 // ---- INIT ----
-if (allTx.length) {
-  setSync('ok');
-  fullRender();
-} else {
-  renderPeriodBar();
-  renderCards();
-  renderTransactions();
-  setSync('ok');
-}
+setSync('ok');
+render();
 </script>
 </body>
 </html>
